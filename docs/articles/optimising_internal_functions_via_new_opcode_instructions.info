@@ -1,0 +1,353 @@
+[[[title]]]
+Optimising Internal Functions via New Opcode Instructions
+
+[[[url]]]
+optimising_internal_functions_via_new_opcode_instructions
+
+[[[date]]]
+2017-11-22
+
+[[[author]]]
+Thomas Punt
+
+[[[series_name]]]
+
+[[[series_url]]]
+
+[[[excerpt]]]
+In this article, we will take a look at the optimisation technique of converting built-in functions to opcodes. This will involve firstly taking a look at how it has been used upon a number of functions in the latest PHP 7.2 release for greater performance. We will then go on to write our own implementation to optimise the [`ord`](http://php.net/ord) function for a more in-depth look at the application of this optimisation technique.
+
+[[[body]]]
+Built-in functions that perform only a little amount of computation can incur much of their overhead in the function call routine. For such functions, if their usage is common enough, they can instead be converted into opcode instructions to remove this overhead (as well as perform some of their own independent optimisations).
+
+In this article, we will take a look at this optimisation technique and how it has been used upon a number of functions in the latest PHP 7.2 release to achieve greater performance. We will then write our own implementation to optimise the [`ord`](http://php.net/ord) function for a more in-depth look at the application of this optimisation.
+
+Thanks once again to [Nikita Popov](https://github.com/nikic) for proofreading my article!
+
+
+## A Quick Overview
+
+The function calling routine in PHP begins with an initialisation stage (via one of the `INIT_*` opcodes), where a new stack frame is created and pushed onto the virtual machine stack. Function arguments are then pushed into the newly created stack frame (via the `SEND_*` opcodes). The function call is carried out (via the `DO_*` opcodes), and then the newly created stack frame is destroyed.
+
+This carries with it a cost that may be more expensive than the actual function computation itself (for the simplest of internal functions, at least). (The [parameter parsing API](https://phpinternals.net/categories/zend_parameter_parsing) also used to cause a fair amount of overhead, however, with the new macro-based API introduced into PHP 7.0, this overhead is quite minimal now.) For a function such as [`gettype`](http://php.net/gettype), the computation of fetching the type of a [`zval`](https://phpinternals.net/docs/zval) is quite small, and so PHP 7.2 optimises away this function call (along with a few others) to be an opcode instead.
+
+For a script such as the following:
+```php
+gettype('a');
+```
+
+The old opcode dump would look like:
+```
+line     #* E I O op                           fetch          ext  return  operands
+-------------------------------------------------------------------------------------
+   9     0  E >   INIT_FCALL                                               'gettype'
+         1        SEND_VAL                                                 'a'
+         2        DO_ICALL
+  14     3      > RETURN                                                   1
+```
+
+Where as the new opcode dump looks like:
+```
+line     #* E I O op                           fetch          ext  return  operands
+-------------------------------------------------------------------------------------
+   9     0  E >   GET_TYPE                                         ~0      'a'
+         1        FREE                                                     ~0
+  14     2      > RETURN                                                   1
+```
+
+With the overview out of the way, let's see what related changes have been made in the latest PHP 7.2 release.
+
+## New Internal Function Opcodes in PHP 7.2
+
+The following lists the internal functions that now have dedicated opcode instructions:
+Internal Function | New Opcode Instruction
+----------------------- | ---------------------------------
+[`count`](http://php.net/count) | `ZEND_COUNT`
+[`get_class`](http://php.net/get_class) | `ZEND_GET_CLASS`
+[`get_called_class`](http://php.net/get_called_class) | `ZEND_GET_CALLED_CLASS`
+[`gettype`](http://php.net/gettype) | `ZEND_GET_TYPE`
+[`func_num_args`](http://php.net/func_num_args) | `ZEND_FUNC_NUM_ARGS`
+[`func_get_args`](http://php.net/func_get_args) | `ZEND_FUNC_GET_ARGS`
+[`in_array`](http://php.net/in_array) | `ZEND_IN_ARRAY`
+
+Let's do some performance testing on a few of these to see what the difference is. To be sure that other optimisations do not interfere, I will be testing the commit that introduced the new opcode, and the commit directly before it.
+
+### The `count` Function
+
+Test script:
+```php
+<?php
+
+$a = [1,2,3];
+
+for ($i = 0; $i < 50000000; ++$i) { /* 50_000_000 */
+    count($a);
+}
+```
+
+Results (best of 3 runs):
+ - Before: **1.410** seconds
+ - After: **0.828** seconds
+
+That's approximately **1.70** times faster.
+
+### The `gettype` Function
+
+Test script:
+```php
+<?php
+
+$a = [1,2,3];
+
+for ($i = 0; $i < 50000000; ++$i) { /* 50_000_000 */
+    gettype($a);
+}
+```
+
+Results (best of 3 runs):
+ - Before: **1.786** seconds
+ - After: **0.738** seconds
+
+That's approximately **2.42** times faster.
+
+The `gettype` optimisation is more impactful than `count`. This could be because the function computation for `gettype` is smaller than `count`, and so the calling routine represented a larger overhead for `gettype` previously. By removing this, it has caused a larger speedup.
+
+### The `in_array` Function
+
+The `in_array` function optimisation is a little more interesting than the others. This is because it doesn't simply convert `in_array` function calls to the `ZEND_IN_ARRAY` opcode. It instead performs this conversion only under certain circumstances, and performs its own set of optimisations.
+
+For cases when the array being searched is a literal array, the compiler will invert the array (effectively making it a hash table), to provide a constant time (O(1)) lookup on the array, instead of the currently seen linear time (O(n)) lookup.
+
+This looks like the following in PHP code:
+```php
+<?php
+
+$array = ['a', 'b', 'c'];
+
+// from this
+in_array('j', $array); // O(n) lookup time
+
+// to this
+$hashtable = array_flip($array);
+isset($hashtable['j']); // O(1) lookup time
+```
+
+Test script:
+```php
+<?php
+
+for ($i = 0; $i < 50000000; ++$i) { /* 50_000_000 */
+    in_array('j', ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']);
+}
+```
+
+Results (best of 3 runs):
+ - Before: **3.559** seconds
+ - After: **1.159** seconds
+
+That's approximately **3.07** times faster.
+
+A similar test script would also be:
+```php
+<?php
+
+$ht = ['a'=>0, 'b'=>0, 'c'=>0, 'd'=>0, 'e'=>0, 'f'=>0, 'g'=>0, 'h'=>0, 'i'=>0, 'j'=>0];
+
+for ($i = 0; $i < 50000000; ++$i) { /* 50_000_000 */
+    isset($ht['j']);
+}
+```
+
+This runs in **1.235** seconds, which makes it *slower* than the optimised `in_array` lookup. So how can this be? Well, because the `ZEND_IN_ARRAY` opcode is very specialised, it can make assumptions about the data it is working on. For example, it already knows it is dealing with a hashtable, whereas `isset` (the `ZEND_ISSET_ISEMPTY_DIM_OBJ` opcode, in this case), cannot make this assumption, and so it must perform additional checks. Looking at the output of Cachegrind, it seems that it's the additional instructions required by `isset` that make it slower here (branch mispredictions for both test scripts are minimal, due to the same branches always being taken in our *artificial* benchmark).
+
+So whilst introducing a new opcode instruction has removed the overhead of the function calling convention, the main benefit in this case has been the ability to specially handle the `in_array` function call as if it were a hash table lookup. There are, of course, some finer details to the `in_array` optimisation that I haven't told you about, but these are best left to the [`ZEND_IN_ARRAY`](https://phpinternals.net/docs/zend_in_array) documentation.
+
+Let's now implement our own opcode for the `ord` function, to see how converting a function call to an opcode works in more depth.
+
+## Optimising the `ord` Function
+
+> For this implementation, we will be using the PHP-7.2 branch of php-src.
+
+In order to handle this function differently, we must firstly check for it during the [compilation phase](https://phpinternals.net/categories/compiler). If it is found, then we can handle it specifically by emitting a specialised opcode, rather than the usual sequence of opcodes used by the function calling routine. Fortunately, this work is already partially done for us. The function is already special-cased by the compiler, where it is [evaluated at compile-time](https://phpinternals.net/categories/compiler#optimisations) if it has a literal argument that is of the correct type. (Such special-casing requires the function to be statically resolvable, so it must either be in the global namespace, or it must be fully-qualified - see [Namespacing and Optimisations](https://phpinternals.net/categories/compiler#namespacing-and-optimisations) for further information on this).
+
+The [`zend_try_compile_special_func`](https://github.com/php/php-src/blob/31d9287d2b4bc30a5fc032a94cb3cec214aa715e/Zend/zend_compile.c#L3872) function is where this special-casing occurs. Looking at the `ord` function check specifically:
+```c
+	} else if (zend_string_equals_literal(lcname, "ord") && type == BP_VAR_R) {
+		return zend_compile_func_ord(result, args);
+```
+
+The `BP_VAR_R` check is done simply to maintain backwards compatibility. For example, code that uses the result of `ord` in a write context (`BP_VAR_W`) (such as `ord('a')[0][] = 1;`) should emit an `E_WARNING` at runtime. If the `BP_VAR_R` check was not performed, then the function would be evaluated at compile-time, and the compiler would see the result as invalid code (`97[0][] = 1;`) and emit an `E_COMPILE_ERROR` instead. So the evaluation is purposefully delayed in this erroneous use-case until runtime for the preservation of backwards compatibility.
+
+So anyway, the code we are really interested in lies in the [`zend_compile_func_ord`](https://github.com/php/php-src/blob/307e15592b31d65047aa04ba7892193a22ff4f94/Zend/zend_compile.c#L3483) function. Let's take a look at it now:
+```c
+int zend_compile_func_ord(znode *result, zend_ast_list *args)
+{
+	if (args->children == 1 &&
+	    args->child[0]->kind == ZEND_AST_ZVAL &&
+	    Z_TYPE_P(zend_ast_get_zval(args->child[0])) == IS_STRING) {
+
+		result->op_type = IS_CONST;
+		ZVAL_LONG(&result->u.constant, (unsigned char)Z_STRVAL_P(zend_ast_get_zval(args->child[0]))[0]);
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
+}
+```
+
+We can see that it performs 3 checks:
+ - Correct argument count
+ - Literal argument (via `ZEND_AST_ZVAL`)
+ - Correct argument type
+
+These checks are necessary for compile-time evaluation, but for runtime evaluation, we only need to check the argument count. So let's rewrite the `zend_compile_func_ord` function to either fail, evaluate at compile time, or emit a new opcode for runtime evaluation:
+```c
+int zend_compile_func_ord(znode *result, zend_ast_list *args)
+{
+	if (args->children != 1 || args->child[0]->kind == ZEND_AST_UNPACK) {
+		return FAILURE;
+	}
+
+	if (args->child[0]->kind == ZEND_AST_ZVAL &&
+	    Z_TYPE_P(zend_ast_get_zval(args->child[0])) == IS_STRING) {
+
+		result->op_type = IS_CONST;
+		ZVAL_LONG(&result->u.constant, (unsigned char)Z_STRVAL_P(zend_ast_get_zval(args->child[0]))[0]);
+	} else {
+		znode arg_node;
+
+		zend_compile_expr(&arg_node, args->child[0]);
+		zend_emit_op_tmp(result, ZEND_ORD, &arg_node, NULL);
+	}
+
+	return SUCCESS;
+}
+```
+
+We fail if there's an incorrect argument count, or if argument unpacking is used (e.g. `ord(...$args);`). (The dynamic nature of argument unpacking means that we simply cannot handle it at compile time.) We then either perform a compile time evaluation if the argument is a string literal (as seen before), or emit a new `ZEND_ORD` opcode with a temporary (`TMPVAR`) result. (Temporary results are used to hold intermediate results from evaluated expressions, such as a function call.)
+
+Also, it's important to note that despite introducing a new opcode for `ord`, we will still leave the old definition (in `PHP_FUNCTION(ord)`) untouched. This is because the old handler may still be invoked if the updated `zend_compile_func_ord` function fails (either due to an incorrect argument count or if argument unpacking is used), or if there is a dynamic function call to `ord` (such as `$ord('a')`).
+
+Now with the compilation phase updated, we need to update the [virtual machine](https://phpinternals.net/categories/zend_virtual_machine) with a new opcode handler for our new `ZEND_ORD` opcode. We do this by updating the `zend_vm_def.h` file with the following:
+```c
+ZEND_VM_HANDLER(198, ZEND_ORD, CONST|TMP|VAR|CV, UNUSED)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *op1, op1_copy;
+	zend_string *val;
+
+	SAVE_OPLINE();
+	op1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+	ZVAL_COPY(&op1_copy, op1);
+
+	if (!zend_parse_arg_str(&op1_copy, &val, 0)) {
+		ZVAL_NULL(EX_VAR(opline->result.var));
+		zend_error(E_WARNING, "ord() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(&op1_copy)));
+	} else {
+		ZVAL_LONG(EX_VAR(opline->result.var), (unsigned char) ZSTR_VAL(val)[0]);
+	}
+
+	zval_ptr_dtor(&op1_copy);
+
+	FREE_OP1();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+```
+
+The implementation uses the `zend_parse_arg_str` function, which is used internally by the [`Z_PARAM_STR`](https://phpinternals.net/docs/z_param_str) macro in the [parameter parsing API](https://phpinternals.net/categories/zend_parameter_parsing). This was done deliberately to ensure that the same semantics are replicated for both the opcode version and the C function version (seen in the [`PHP_FUNCTION(ord)`](https://github.com/php/php-src/blob/307e15592b31d65047aa04ba7892193a22ff4f94/ext/standard/string.c#L2757) definition). Since `zend_parse_arg_str` changes the argument passed to it, a copy of the argument must be passed in to prevent `ord`s argument from being inadvertently changed (e.g. calling `ord($c);` would unexpectedly change the value of `$c`).
+
+Now regenerate the vm by going into the `Zend/` directory and running the virtual machine generation script: `php zend_vm_gen.php`. PHP can then be built with the latest VM changes.
+
+Since we simply reused the same parsing logic in the [`Z_PARAM_STR`](https://phpinternals.net/docs/z_param_str) macro, we should not have any bugs. But to double check, let's compare the output of a direct call to `ord` (which will use the `ZEND_ORD` opcode) and a dynamic call to it (which will use the `PHP_FUNCTION(ord)` definition):
+```php
+<?php
+
+$ord = 'ord';
+
+$float = 1.2;
+$resource = fopen(__FILE__, 'r');
+$object = new StdClass();
+$null = null;
+$boolTrue = true;
+$boolFalse = false;
+$integer = 15;
+
+var_dump(
+    ord($float) === $ord($float),
+    ord($resource) === $ord($resource),
+    ord($object) === $ord($object),
+    ord($null) === $ord($null),
+    ord($boolTrue) === $ord($boolTrue),
+    ord($boolFalse) === $ord($boolFalse),
+    ord($integer) === $ord($integer)
+);
+```
+
+Output:
+```
+Warning: ord() expects parameter 1 to be string, resource given in /Users/tpunt/prog/php/tpuntphp/a.php on line 20
+
+Warning: ord() expects parameter 1 to be string, resource given in /Users/tpunt/prog/php/tpuntphp/a.php on line 20
+
+Warning: ord() expects parameter 1 to be string, object given in /Users/tpunt/prog/php/tpuntphp/a.php on line 21
+
+Warning: ord() expects parameter 1 to be string, object given in /Users/tpunt/prog/php/tpuntphp/a.php on line 21
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+```
+
+So it looks like we have correctly replicated the semantics for backwards compatibility.
+
+Let's now do a performance test with the following script:
+```php
+<?php
+
+$a = 'a';
+
+for ($i = 0; $i < 50000000; ++$i) { /* 50_000_000 */
+    ord($a);
+}
+```
+
+Results (best of 3 runs):
+ - Before: **1.180** seconds
+ - After: **0.776** seconds
+
+So the new opcode-based implementation is approximately **1.52** times faster.
+
+### Updating OPcache
+
+[OPcache](https://phpinternals.net/categories/opcache) packs with it type inference for its SSA-based framework. This should be updated so that when it comes across our new opcode, it can update its inference rules to cater for the potential type of the expected return value.
+
+This will involved updating the [`zend_inference_calc_range`](https://github.com/php/php-src/blob/PHP-7.2/ext/opcache/Optimizer/zend_inference.c#L759) and [`zend_update_type_info`](https://github.com/php/php-src/blob/PHP-7.2/ext/opcache/Optimizer/zend_inference.c#L2134) functions with the following:
+```c
+// zend_inference_calc_range
+		case ZEND_ORD:
+			tmp->min = 0;
+			tmp->max = 255;
+
+// zend_update_type_info
+		case ZEND_ORD:
+			UPDATE_SSA_TYPE(MAY_BE_LONG | MAY_BE_NULL, ssa_ops[i].result_def);
+			break;
+```
+
+I don't want to deviate too much from the main topic at hand, and so I don't intend on covering specific details of OPcache's SSA framework here. Those will be covered in later articles instead.
+
+
+### The Ramifications
+
+The most notable problem of this optimisation is the duplication of semantics in the opcode definition and internal function definition. There is a chance that they could go out-of-sync with one-another, which could lead to some odd bugs. Another problem is the increase in size of the virtual machine (which has been steadily increasing over the years). Generating a standard VM (which uses [opcode handler specialisation](https://phpinternals.net/categories/zend_virtual_machine#opcode-handler-specialisation)) now stands at almost 70,000 lines of code. With our new change, we have added another 146 lines of code to that. It's not a lot compared to the current VM size, but it doesn't particularly help either.
+
+
+## Wrapping Up
+
+PHP 7.2 brings with it many different optimisations, with internal function calls being converted to opcodes as just one of them. If you would like to see more of the optimisations that have been made in PHP, then checkout the [Optimisations](https://phpinternals.net/categories/optimisations) category for a list of them.
+
+The final implementation can be found at [tpunt/php-src:ord-opcode](https://github.com/php/php-src/compare/master...tpunt:ord-opcode). Also, if you're feeling up for an exercise, then you can try to convert the built-in [`chr`](http://php.net/chr) function to an opcode (the logic should be pretty similar to the `ord` function).

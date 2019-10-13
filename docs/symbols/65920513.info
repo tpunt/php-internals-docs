@@ -1,0 +1,36 @@
+[[[id]]]
+65920513
+
+[[[name]]]
+ZVAL_ARR
+
+[[[url]]]
+zval_arr
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZVAL_ARR(z, a)
+
+[[[parameters]]]
+z
+The [`zval *`](https://phpinternals.net/docs/zval) to set the array value of
+
+a
+The [`zend_array *`](https://phpinternals.net/docs/zend_array) value being set
+
+[[[definition]]]
+#define ZVAL_ARR(z, a) do {						\
+		zval *__z = (z);						\
+		Z_ARR_P(__z) = (a);						\
+		Z_TYPE_INFO_P(__z) = IS_ARRAY_EX;		\
+	} while (0)
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/1d9b46f3621db7f1f1d445d8168b8224d1fb4f02/Zend/zend_types.h#L723
+
+[[[description]]]
+Sets the array value of a [`zval`](https://phpinternals.net/docs/zval) (see the [`IS_ARRAY`](https://phpinternals.net/docs/is_array) type).
+
+[[[additional_information]]]

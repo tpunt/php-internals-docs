@@ -1,0 +1,46 @@
+[[[id]]]
+71833513
+
+[[[name]]]
+zval_get_string
+
+[[[url]]]
+zval_get_string
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define zval_get_string(op) _zval_get_string((op))
+
+[[[parameters]]]
+op
+The [`zval *`](https://phpinternals.net/docs/zval) to retrieve a [`zend_string *`](https://phpinternals.net/docs/zend_string) from
+
+[[[definition]]]
+static zend_always_inline zend_string *_zval_get_string(zval *op) {
+	return Z_TYPE_P(op) == IS_STRING ? zend_string_copy(Z_STR_P(op)) : _zval_get_string_func(op);
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/ce10a987c84b82b197f9ac7b3c9bf5b2c348dcec/Zend/zend_operators.h#L278
+
+[[[description]]]
+Retrieves a [`zend_string`](https://phpinternals.net/docs/zend_string) from the given [`zval`](https://phpinternals.net/docs/zval). If the `zval` is not an [`IS_STRING`](https://phpinternals.net/docs/is_string), then it will be coerced to a string.
+
+[`IS_ARRAY`](https://phpinternals.net/docs/is_array) and `IS_RESOURCE` will be simply converted to `'Array'` and `'Resource id #%d'`. [`IS_OBJECT`](https://phpinternals.net/docs/is_object) will have its `__toString` function invoked (if this is not defined, then a recoverable fatal error will be emitted).
+
+[[[additional_information]]]
+For example:
+```c
+void stringify(zval *z)
+{
+    zend_string *str = zval_get_string(z);
+
+    php_printf("'%s'\n", ZSTR_VAL(str));
+
+    zend_string_release(str);
+}
+```
+
+We must release the string (decrement the its reference count) afterwards to prevent any leaking. This is because if the `zval` argument is a string, then it will have its reference count incremented - if it is something else, then it will create a new string with a reference count of `1`.

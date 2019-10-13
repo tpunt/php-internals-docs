@@ -1,0 +1,242 @@
+[[[name]]]
+Extensions
+
+[[[url]]]
+extensions
+
+[[[subcategories]]]
+php_extensions
+
+[[[supercategories]]]
+
+[[[articles]]]
+
+[[[symbols]]]
+87380507
+84603824
+37432878
+
+[[[body]]]
+Extensions (either [PHP extensions](https://phpinternals.net/categories/php_extensions) or Zend extensions) are a way of bringing additional functionality (and sometimes performance) to the language. They can be loaded either statically or as shared modules.
+
+Static loading is where they are built alongside PHP itself, where the extension is apart of the resulting PHP binary. This has the advantage of everything being contained within a single file (the PHP binary), along with brining a slight performance improvement. Core extensions will typically be built statically, since they are already bundled in with the PHP source code. In order to build an external extension statically, its source code would need to be cloned into the [ext](https://github.com/php/php-src/tree/80745e69143cae33b8acbdcbecb0232738e5475a/ext) directory, the PHP configure files would need to be rebuild (`./buildconf --force`), and then it would need to be enabled (through the `./configure` command).
+
+Shared extensions provide a convenient way of loading an extension into an already built copy of PHP. They must be compiled against the (correct) PHP configuration files, and then the resulting binary (a `.so` or `.dll`) must be enabled in the  php.ini file.
+
+## PHP's Lifecycle
+
+When developing an extension, it is important to understand PHP's lifecycle. This is because different stages in this lifecycle have different purposes, and so in order to correctly (and therefore safely) utilise them, knowledge of them is needed.
+
+The following depicts what a typical (single-threaded) PHP lifecycle may look like:
+![A single-threaded PHP request cycle](https://i.imgur.com/JiLlB8G.png)
+
+Looking at things from a high-level perspective, PHP goes through the module initialisation phase (invoking `MINIT`), then it handles one or more request cycles (invoking `RINIT`, executing PHP code, then invoking `RSHUTDOWN`) sequentially (in single-threaded mode), and then goes through the module shutdown phase (invoking `MSHUTDOWN`) before the PHP process ends.
+
+See also the [Multithreaded Web Servers](https://phpinternals.net/categories/thread_safe_resource_manager#multithreaded-web-servers) section of the [TSRM](https://phpinternals.net/categories/thread_safe_resource_manager) for an example of a multithreaded PHP request cycle.
+
+### Module Startup
+
+When PHP starts up, it will startup all of its modules. This involves invoking the `MINIT` handlers for every extension. This phase includes:
+ - Initialising internal classes
+ - Registering constants
+ - Registering PHP ini settings
+
+Because threading in the Zend Engine can only safely occur upon the request cycle (see the [TSRM](https://phpinternals.net/categories/thread_safe_resource_manager) for more information), global data at this stage may be safely mutated without needing locks.
+
+### Request Startup
+
+The request cycle is where the lexer, compiler, and executor are loaded to run PHP code. Any globals that are mutated within this stage must be mutex controlled, which is where the TSRM comes into play and the handling of globals in extensions (see the section [Dealing with Globals](https://phpinternals.net/categories/extensions#dealing-with-globals)).
+
+## Dealing with Globals
+
+Global C variables in extensions will not be thread-safe, and so they need special handling in order to work safely in Zend Thread Safety (ZTS) mode. Broadly, there are two types of globals: true globals, and Zend globals (ZG).
+
+### True Globals
+
+True globals are normal C variables that have been declared in the global scope. These may be safely manipulated inside of the module initialisation phase, since at this stage there will not be multiple threads spawned inside of the PHP process. Inside of the request initialisation phase, however, manipulating such true globals will require the usual mutex locking controls used in multithreaded environments.
+
+True globals are not really used by extension authors, because having the same piece of data available across multiple request cycles is not usually desirable. But sometimes they can be useful when used in a read-only manner for a lower memory consumption in multithreaded environments.
+
+### Zend Globals
+
+Zend globals, unlike true globals, do not require mutex controls to enable for the safe mutability of them. This is because they are stored in local storage inside of the  [Thread Safe Resource Manager](https://phpinternals.net/categories/thread_safe_resource_manager). This means such globals are only available inside of the request cycle in which they are created in.
+
+#### Declaring Zend Globals
+
+Zend globals can be declared as part of the extension's globals, which can be done inside of the extension's main header file. This looks similar to the following:
+```c
+ZEND_BEGIN_MODULE_GLOBALS(ext_name)
+	HashTable my_ht;
+ZEND_END_MODULE_GLOBALS(ext_name)
+
+ZEND_EXTERN_MODULE_GLOBALS(ext_name)
+
+#define EXT_NAME_ZG(v) ZEND_MODULE_GLOBALS_ACCESSOR(ext_name, v)
+```
+
+There are three parts to the above:
+ 1. Declare the global variables inside of the `ZEND_*_MODULE_GLOBALS` macros (which wraps them into a structure)
+ 2. Make this structure accessible to any files that include this header file
+ 3. Provide a uniform way to access this global via a macro, irregardless of whether ZTS mode is enabled or not
+
+Next, we need to actually declare this structure, which is typically done inside of the main source file:
+```c
+ZEND_DECLARE_MODULE_GLOBALS(ext_name)
+```
+
+Finally, we need to tell the engine that the module is utilising globals. This is done in the module entry definition, and causes the TSRM to allocate space for our globals inside of its resource manager:
+```c
+zend_module_entry ext_name_module_entry = {
+	STANDARD_MODULE_HEADER,
+	"ext_name",
+	ext_name_functions,
+	PHP_MINIT(ext_name),
+	PHP_MSHUTDOWN(ext_name),
+	PHP_RINIT(ext_name),
+	PHP_RSHUTDOWN(ext_name),
+	PHP_MINFO(ext_name),
+	PHP_EXT_NAME_VERSION,
+	PHP_MODULE_GLOBALS(ext_name), // line of interest
+	NULL,
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
+};
+```
+
+#### Initialising Zend Globals
+
+Zend globals may be initialised in a couple of different ways. The most appropriate way would be to use the `GINIT` and `GSHUTDOWN` handlers. The `GINIT` handler is triggered firstly before the `MINIT` handler, and then before `RINIT` handlers that occur in child threads spawned inside of the main PHP process (which is only relevant in multithreaded environments). The `GSHUTDOWN` handler executes after the `MSHTUDOWN` handler in the main PHP process, and after the `RSHUTDOWN` handlers in child threads.
+
+Adapting the [multithreaded web servers](https://phpinternals.net/categories/thread_safe_resource_manager#multithreaded-web-servers) diagram to display the initialisation and shutdown phases of the globals handlers looks as follows (see the highlighted green areas):
+![A multi-threaded PHP request cycle](https://i.imgur.com/HqdQPsx.png)
+
+As mentioned above, the main PHP process will have its globals initialised before the `MINIT` handlers. The request cycle on the far left is not encapsulated within a box, because it does not occur within a spawned child thread (but rather in the PHP process itself). The other two request cycles do occur within their own threads, and so require their own `GINIT` and `GSHUTDOWN` phases to initialise and destroy their thread local data that was allocated by the TSRM.
+
+The above diagram depicts more closely how an extension such as [Pthreads](https://github.com/krakjoe/pthreads) works. Multithreaded web servers do not use the request cycle in the main PHP process because attempting to startup subsequent request cycles in the main PHP process would reuse the previous request's data. They therefore always spawn new threads to encapsulate requests with their own thread-local data. If we were to elide the left request cycle, then it would more closely show how globals work in a multithreaded web server environment.
+
+With the theory out of the way, let's define these handlers and then register them for our extension:
+```c
+PHP_GINIT_FUNCTION(ext_name)
+{
+	zend_hash_init(ext_name->my_ht, 0, NULL, ZVAL_PTR_DTOR, 0);
+}
+
+PHP_GSHUTDOWN_FUNCTION(ext_name)
+{
+	zend_hash_destroy(ext_name->my_ht);
+}
+
+// register the handlers in the module entry structure
+zend_module_entry ext_name_module_entry = {
+	STANDARD_MODULE_HEADER,
+	"ext_name",
+	ext_name_functions,
+	PHP_MINIT(ext_name),
+	PHP_MSHUTDOWN(ext_name),
+	PHP_RINIT(ext_name),
+	PHP_RSHUTDOWN(ext_name),
+	PHP_MINFO(ext_name),
+	PHP_EXT_NAME_VERSION,
+	PHP_MODULE_GLOBALS(ext_name),
+	PHP_GINIT(ext_name),          // line of interest
+	PHP_GSHUTDOWN(ext_name),      // line of interest
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
+};
+```
+
+On a final note, there are other ways to initialise and destroy Zend globals, such as via the `RINIT` and `RSHUTDOWN` handlers. But it is best to stay with using the globals handlers to keep such logic properly separated in your extension.
+
+## Using ini Settings
+
+Extensions may utilise the php.ini file to enable for runtime configuration of the extension.
+
+### The Basics
+
+Firstly, the correct header file must be included:
+```c
+#include "php_ini.h"
+```
+
+Next, the ini settings need to be declared:
+```c
+PHP_INI_BEGIN()
+    STD_PHP_INI_ENTRY("ext_name.setting1", "123", PHP_INI_ALL, OnUpdateLong, setting1, zend_ext_name_globals, ext_name_globals)
+    STD_PHP_INI_ENTRY("ext_name.setting2", "some setting", PHP_INI_ALL, OnUpdateString, setting2, zend_ext_name_globals, ext_name_globals)
+PHP_INI_END()
+```
+(See the [`STD_PHP_INI_ENTRY`](https://phpinternals.net/docs/std_php_ini_entry) macro for further information.)
+
+ini settings are stored as members in the extension's corresponding Zend globals structure, so this will need to be amended to cater for these new ini settings also.
+
+The ini settings need to be registered on module initialisation:
+```c
+PHP_MINIT_FUNCTION(ext_name)
+{
+	REGISTER_INI_ENTRIES();
+
+	return SUCCESS;
+}
+```
+
+And they should be unregistered on module shutdown:
+```c
+PHP_MSHUTDOWN_FUNCTION(ext_name)
+{
+	UNREGISTER_INI_ENTRIES();
+
+	return SUCCESS;
+}
+```
+
+They should also be shown in the `php_info` PHP function output:
+```c
+PHP_MINFO_FUNCTION(ext_name)
+{
+	php_info_print_table_start();
+	php_info_print_table_header(2, "ext_name support", "enabled");
+	php_info_print_table_end();
+
+	DISPLAY_INI_ENTRIES();
+}
+```
+
+### The Advanced
+
+ - `ZEND_INIT_MODULE_GLOBALS` ?
+ - `STD_PHP_INI_BOOLEAN` ?
+ - `ZEND_INI_SYSTEM`, `ZEND_INI_PERDIR`, `ZEND_INI_USER`
+ - `ZEND_INI_MH` (custom modify handlers)
+
+## Registering new Classes
+
+Registering a new class must be done inside of the module initialisation phase. It has the following stages:
+```c
+zend_class_entry *NewClass_ce;
+zend_object_handlers new_class_object_handlers;
+
+zend_function_entry NewClass_methods[] = {
+    PHP_FE_END
+};
+
+PHP_MINIT_FUNCTION(ext_name)
+{
+    zend_class_entry ce;
+
+    INIT_CLASS_ENTRY(ce, "NewClass", NewClass_methods);
+
+    NewClass_ce = zend_register_internal_class(&ce);
+
+    // set the class entry handlers on NewClass_ce
+
+    // set the object handlers that will be used by NewClass_ce objects
+    memcpy(&new_class_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+}
+```
+
+For more information on class handlers, see the [Class Handlers](https://phpinternals.net/categories/zend_classes#class-handlers) section of the [Zend Classes](https://phpinternals.net/categories/zend_classes) category. See also the [Object Handlers](https://phpinternals.net/categories/zend_objects#object-handlers) section of the [Zend Objects](https://phpinternals.net/categories/zend_objects) category for more information on object handlers.
+
+Notes:
+ - To make a class final, set the [`ZEND_ACC_FINAL`](https://phpinternals.net/docs/zend_acc_final) flag on the class entry.
+ - To implement one or more interfaces, use the [`zend_class_implements`](https://phpinternals.net/docs/zend_class_implements) function.

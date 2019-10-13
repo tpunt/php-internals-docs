@@ -1,0 +1,26 @@
+[[[id]]]
+13462309
+
+[[[name]]]
+IS_OBJ_DESTRUCTOR_CALLED
+
+[[[url]]]
+is_obj_destructor_called
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define IS_OBJ_DESTRUCTOR_CALLED (1<<3)
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/840b77c02e23d3be8fdafc87ba192b1ab211245e/Zend/zend_types.h#L504
+
+[[[description]]]
+Used to mark an object as destroyed. This flag is set either after an object has had its destructor invoked, or if the object failed upon construction. It is used to prevent an object from having its destructor called multiple times.
+
+[[[additional_information]]]

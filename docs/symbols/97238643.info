@@ -1,0 +1,28 @@
+[[[id]]]
+97238643
+
+[[[name]]]
+ZEND_STRL
+
+[[[url]]]
+zend_strl
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZEND_STRL(str) (str), (sizeof(str)-1)
+
+[[[parameters]]]
+str
+The string literal to expand
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/f066f59eab719d0171febf7bcd7f70edb5ffd6bd/Zend/zend_portability.h#L476
+
+[[[description]]]
+This is a shortcut macro that expands a string literal to itself and its actual length (without the NUL byte character). It *must* only be used with string literals, and is generally only used for argument passing to functions that expect a string and its respective length.
+
+[[[additional_information]]]

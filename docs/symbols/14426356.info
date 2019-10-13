@@ -1,0 +1,26 @@
+[[[id]]]
+14426356
+
+[[[name]]]
+IS_NULL
+
+[[[url]]]
+is_null
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define IS_NULL 1
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/9dada7b291d3fb88a81406cafa5d6fbcb1ee11f0/Zend/zend_types.h#L363
+
+[[[description]]]
+This type is used to denote `null` in PHP. The [`Z_ISNULL`](https://phpinternals.net/docs/z_isnull) macro can be used to check for this type, and the [`ZVAL_NULL`](https://phpinternals.net/docs/zval_null) macro can be used to set this type.
+
+[[[additional_information]]]

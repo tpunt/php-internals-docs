@@ -1,0 +1,32 @@
+[[[id]]]
+75673719
+
+[[[name]]]
+zend_stack_count
+
+[[[url]]]
+zend_stack_count
+
+[[[type]]]
+function
+
+[[[declaration]]]
+ZEND_API int zend_stack_count(const zend_stack *stack);
+
+[[[parameters]]]
+stack
+The stack to return the number of elements of
+
+[[[definition]]]
+ZEND_API int zend_stack_count(const zend_stack *stack)
+{
+	return stack->top;
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/ec2823fb8c090c0d71f231c18a609d28b5b7b240/Zend/zend_stack.c#L99
+
+[[[description]]]
+Fetches the number of elements in the stack.
+
+[[[additional_information]]]

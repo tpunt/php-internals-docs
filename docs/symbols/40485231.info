@@ -1,0 +1,43 @@
+[[[id]]]
+40485231
+
+[[[name]]]
+GC_MAY_LEAK
+
+[[[url]]]
+gc_may_leak
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define GC_MAY_LEAK(ref)
+
+[[[parameters]]]
+ref
+The reference-counted value to check
+
+[[[definition]]]
+#define GC_MAY_LEAK(ref) \
+	((GC_TYPE_INFO(ref) & \
+		(GC_INFO_MASK | (GC_COLLECTABLE << GC_FLAGS_SHIFT))) == \
+	(GC_COLLECTABLE << GC_FLAGS_SHIFT))
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/bb217f781a34a06bf682885b5f8e000a319d01a0/Zend/zend_gc.h#L142
+
+[[[description]]]
+Checks a reference-counted value to see if it may leak memory (this requires it to be a [`GC_COLLECTABLE`](https://phpinternals.net/docs/gc_collectable) type). Leaks may occur in the event that a collectable has a cyclic reference, causing its reference count to never reach `0`. This limitation of the [reference-based collector](https://phpinternals.net/categories/garbage_collector#the-reference-based-collector) is resolved by the [cycle detector](https://phpinternals.net/categories/garbage_collector#the-mark-and-sweep-(cycle)-collector).
+
+[[[additional_information]]]
+For example:
+```c
+void can_be_cyclic(zval *z)
+{
+    if (Z_REFCOUNTED_P(z) && GC_MAY_LEAK(Z_COUNTED_P(z))) {
+        php_printf("This zval may contain cycles\n");
+    }
+}
+```
+
+The first check ensures that the [`zval`](https://phpinternals.net/docs/zval) holds a reference-counted value (since not all values are reference-counted, such as [`IS_LONG`](https://phpinternals.net/docs/is_long), [`IS_DOUBLE`](https://phpinternals.net/docs/is_double), and [`IS_NULL`](https://phpinternals.net/docs/is_null)). The reference-counted value is then fetched (via [`Z_COUNTED_P`](https://phpinternals.net/docs/z_counted)), and a check is then performed upon its garbage information to see if it is a collectable.

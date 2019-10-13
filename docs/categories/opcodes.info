@@ -1,0 +1,98 @@
+[[[name]]]
+Opcodes
+
+[[[url]]]
+opcodes
+
+[[[subcategories]]]
+
+[[[supercategories]]]
+zend_virtual_machine
+
+[[[articles]]]
+optimising_internal_functions_via_new_opcode_instructions
+implementing_new_language_constructs_via_opcode_extending
+
+[[[symbols]]]
+62041650
+60339983
+93151772
+29410595
+24243968
+59594599
+89757331
+54379398
+99626983
+31781262
+69670796
+20453082
+81754868
+94335081
+25167937
+47252207
+80929897
+53480554
+98125750
+52682656
+44343503
+17363559
+60086633
+98711653
+37511294
+4027068
+24832276
+17195014
+79385149
+38978530
+13909055
+37641688
+74683098
+28211164
+82270478
+38080982
+41923452
+90656531
+44930507
+8429755
+42633154
+53615945
+73721371
+60820935
+98970705
+83079213
+7846900
+47248793
+41860177
+5856147
+56431871
+58114718
+35407042
+89871969
+63376632
+82725703
+32704009
+
+[[[body]]]
+Opcodes are instructions that are executed by the Zend VM. They are generated during the compilation phase, where the AST is recursively traversed and opcodes are emitted from it.
+
+PHP has a number of opcodes (nearly 200, at the time of writing). Their definitions are stored in the [zend\_vm\_def.h](https://github.com/php/php-src/blob/master/Zend/zend_vm_def.h) definition file. This file is used to generate the VM, as well as the [zend\_vm\_opcodes.c](https://github.com/php/php-src/blob/master/Zend/zend_vm_opcodes.c) and [zend\_vm\_opcodes.h](https://github.com/php/php-src/blob/master/Zend/zend_vm_opcodes.h) files from the [zend\_vm\_gen.php](https://github.com/php/php-src/blob/master/Zend/zend_vm_gen.php) script.
+
+Every opcode has the following properties:
+ - A name (a constant that maps to some integer)
+ - An op1 node (optional). The opcode's first operand
+ - An op2 node (optional). The opcode's second operand
+ - A result node (optional). This is usually used to store a temporary value of the opcode operation
+ - An extended value (optional). This is an integer value that is used to differentiate between behaviours for overloaded opcodes
+
+Opcode nodes (see the [`znode_op`](https://phpinternals.net/docs/znode_op) type) can be of a number of different types:
+ - [`IS_CV`](https://phpinternals.net/docs/is_cv) - for **C**ompiled **V**ariables. These are simple variables (such as `$a`)
+ - [`IS_VAR`](https://phpinternals.net/docs/is_var) - for all other variable-like expressions that aren't simple (such as `$a->b`)
+ - [`IS_CONST`](https://phpinternals.net/docs/is_const) - for literal values (e.g. hard-coded strings)
+ - [`IS_TMP_VAR`](https://phpinternals.net/docs/is_tmp_var) - for temporary variables. These are typically from intermediate results (such as `$a++`)
+ - [`IS_UNUSED`](https://phpinternals.net/docs/is_unused) - for marking an op node as not used
+
+The opcodes for a PHP script can be seen using either:
+ - Opcache: `sapi/cli/php -dopcache.enable_cli=1 -dopcache.opt_debug_level=-1 file.php`
+ - PHPDBG: `sapi/phpdbg/phpdbg -np* file.php`
+ - [Vulcan Logic Disassembler](https://pecl.php.net/package/vld) (VLD): `sapi/cli/php -dvld.active=1 file.php`
+ - Or, if the script is short and trivial, then [3v4l](https://3v4l.org/) can be used

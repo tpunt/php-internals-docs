@@ -1,0 +1,41 @@
+[[[id]]]
+75899866
+
+[[[name]]]
+zend_hash_str_add_empty_element
+
+[[[url]]]
+zend_hash_str_add_empty_element
+
+[[[type]]]
+function
+
+[[[declaration]]]
+ZEND_API zval* ZEND_FASTCALL zend_hash_str_add_empty_element(HashTable *ht, const char *str, size_t len)
+
+[[[parameters]]]
+ht
+The hash table to insert into
+
+str
+The lookup key
+
+len
+The lookup key length
+
+[[[definition]]]
+ZEND_API zval* ZEND_FASTCALL zend_hash_str_add_empty_element(HashTable *ht, const char *str, size_t len)
+{
+	zval dummy;
+
+	ZVAL_NULL(&dummy);
+	return zend_hash_str_add(ht, str, len, &dummy);
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/c8efaea1e3f93b5b836a38c6985b67983b1dc95a/Zend/zend_hash.c#L697
+
+[[[description]]]
+This is the C string variant of [`zend_hash_add_empty_element`](https://phpinternals.net/docs/zend_hash_add_empty_element).
+
+[[[additional_information]]]

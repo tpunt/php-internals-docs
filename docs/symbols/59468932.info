@@ -1,0 +1,36 @@
+[[[id]]]
+59468932
+
+[[[name]]]
+zend_string_release
+
+[[[url]]]
+zend_string_release
+
+[[[type]]]
+function
+
+[[[declaration]]]
+static zend_always_inline void zend_string_release(zend_string *s)
+
+[[[parameters]]]
+s
+The Zend string to free
+
+[[[definition]]]
+static zend_always_inline void zend_string_release(zend_string *s)
+{
+	if (!ZSTR_IS_INTERNED(s)) {
+		if (--GC_REFCOUNT(s) == 0) {
+			pefree(s, GC_FLAGS(s) & IS_STR_PERSISTENT);
+		}
+	}
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/ace9fe53173974ec63f9e0357a6e8372ff5adb3b/Zend/zend_string.h#L287
+
+[[[description]]]
+For non-interned strings, their reference count is decremented. If the Zend string's reference count reaches 0, then it is freed. If it is safe to free the Zend string (i.e. it has no references in other places), then the `zend_string_free` function may be used.
+
+[[[additional_information]]]

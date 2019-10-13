@@ -1,0 +1,46 @@
+[[[id]]]
+40285669
+
+[[[name]]]
+php_printf
+
+[[[url]]]
+php_printf
+
+[[[type]]]
+function
+
+[[[declaration]]]
+PHPAPI size_t php_printf(const char *format, ...);
+
+[[[parameters]]]
+format
+A formatted string to output
+
+...
+The corresponding variables to output from the formatted string
+
+[[[definition]]]
+PHPAPI size_t php_printf(const char *format, ...)
+{
+	va_list args;
+	size_t ret;
+	char *buffer;
+	size_t size;
+
+	va_start(args, format);
+	size = vspprintf(&buffer, 0, format, args);
+	ret = PHPWRITE(buffer, size);
+	efree(buffer);
+	va_end(args);
+
+	return ret;
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/f5c3d21c4e1a1993cbbcdde9383475631f33ab18/main/main.c#L717
+
+[[[description]]]
+This is PHP's buffered output function. It should be used whenever you would like to output something from your extension (not including errors). Not only is buffering output generally faster, but PHP has ways to manipulate its output that will only be possible if the data goes through its output buffer. For example, the `ob_*` functions will only work if `php_printf` is used (not if C's `printf` function is used, for example).
+
+[[[additional_information]]]

@@ -1,0 +1,33 @@
+[[[id]]]
+23927499
+
+[[[name]]]
+ZVAL_DEREF
+
+[[[url]]]
+zval_deref
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZVAL_DEREF(z)
+
+[[[parameters]]]
+z
+The [`zval *`](https://phpinternals.net/docs/zval) to dereference, assigning the dereferenced `zval` back to itself
+
+[[[definition]]]
+#define ZVAL_DEREF(z) do {								\
+		if (UNEXPECTED(Z_ISREF_P(z))) {					\
+			(z) = Z_REFVAL_P(z);						\
+		}												\
+	} while (0)
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/9dada7b291d3fb88a81406cafa5d6fbcb1ee11f0/Zend/zend_types.h#L955
+
+[[[description]]]
+This macro is used to dereference a referenced [`zval`](https://phpinternals.net/docs/zval) (see the [`IS_REFERENCE`](http://phpinternals.net/docs/is_reference) type).
+
+[[[additional_information]]]

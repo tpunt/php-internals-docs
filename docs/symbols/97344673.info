@@ -1,0 +1,28 @@
+[[[id]]]
+97344673
+
+[[[name]]]
+ZSTR_IS_INTERNED
+
+[[[url]]]
+zstr_is_interned
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZSTR_IS_INTERNED(s) (GC_FLAGS(s) & IS_STR_INTERNED)
+
+[[[parameters]]]
+s
+The Zend string to check
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/ace9fe53173974ec63f9e0357a6e8372ff5adb3b/Zend/zend_string.h#L67
+
+[[[description]]]
+Checks whether the given [Zend String](http://phpinternals.net/categories/zend_strings) is interned (see [`IS_STR_INTERNED`](https://phpinternals.net/docs/is_str_interned)).
+
+[[[additional_information]]]

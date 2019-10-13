@@ -1,0 +1,61 @@
+[[[id]]]
+63376632
+
+[[[name]]]
+ZEND_ASSIGN
+
+[[[url]]]
+zend_assign
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZEND_ASSIGN 38
+
+[[[parameters]]]
+
+[[[definition]]]
+ZEND_VM_HANDLER(38, ZEND_ASSIGN, VAR|CV, CONST|TMP|VAR|CV, SPEC(RETVAL))
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op2;
+	zval *value;
+	zval *variable_ptr;
+
+	SAVE_OPLINE();
+	value = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
+
+	if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
+		FREE_OP2();
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
+	} else {
+		value = zend_assign_to_variable(variable_ptr, value, OP2_TYPE);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_COPY(EX_VAR(opline->result.var), value);
+		}
+		FREE_OP1_VAR_PTR();
+		/* zend_assign_to_variable() always takes care of op2, never free it! */
+	}
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/dd15b34018db8a5ba48a79981f7915fd02092b9d/Zend/zend_vm_def.h#L2260
+
+[[[description]]]
+This opcode is used for the assignment operator.
+
+Quick overview:
+ - `op1` - left operand
+ - `op2` - right operand
+ - `result` - assigned value
+ - `extended_value` - unused
+ - `op1_type` - VAR|CV
+ - `op2_type` - CONST|TMP|VAR|CV
+
+[[[additional_information]]]

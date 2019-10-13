@@ -1,0 +1,104 @@
+[[[id]]]
+93151772
+
+[[[name]]]
+ZEND_SWITCH_LONG
+
+[[[url]]]
+zend_switch_long
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZEND_SWITCH_LONG 187
+
+[[[parameters]]]
+
+[[[definition]]]
+ZEND_VM_HANDLER(187, ZEND_SWITCH_LONG, CONST|TMPVAR|CV, CONST, JMP_ADDR)
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op2;
+	zval *op, *jump_zv;
+	HashTable *jumptable;
+
+	op = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	jumptable = Z_ARRVAL_P(GET_OP2_ZVAL_PTR(BP_VAR_R));
+
+	if (Z_TYPE_P(op) != IS_LONG) {
+		ZVAL_DEREF(op);
+		if (Z_TYPE_P(op) != IS_LONG) {
+			/* Wrong type, fall back to ZEND_CASE chain */
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
+
+	jump_zv = zend_hash_index_find(jumptable, Z_LVAL_P(op));
+	if (jump_zv != NULL) {
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, Z_LVAL_P(jump_zv));
+		ZEND_VM_CONTINUE();
+	} else {
+		/* default */
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
+		ZEND_VM_CONTINUE();
+	}
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/0eeaff09cbc82555658fa9f56f9d540a19b9aa06/Zend/zend_vm_def.h#L8031
+
+[[[description]]]
+This opcode was introduced into PHP 7.2 as an optimisation for `switch` statements on integers. It requires all `case` statements to hold literal integers, and the value being `switch`ed by must also be an integer (not necessarily a literal, though). Mixing `case` types (integers with other types, here) is not allowed, and constants as `case` values are not yet supported.
+
+It works by performing a look up into a jump table (a [hash table](https://phpinternals.net/docs/hashtable)) generated during the compilation phase, where each `case` value is used as a key in this hash table, and the corresponding value is the relative jump offset to skip to in the currently executing opline. This provides a constant-time search, rather than the linear-time approach used by the [`ZEND_CASE`](https://phpinternals.net/docs/zend_case) opcode.
+
+The [`ZEND_CASE`](https://phpinternals.net/docs/zend_case) (and `ZEND_JMPNZ`) opcodes are still generated in the event that the value being `switch`ed upon (during runtime) does not have the same type as the jump table keys (`case` values).
+
+Quick overview:
+ - op1 - the value being `switch`ed by
+ - op2 - unused
+ - result - unused
+ - extended_value - the relative jump offset of the default handler in the opline
+ - op1_type - CONST|TMPVAR|CV
+ - op2_type - CONST
+
+See also the [`ZEND_SWITCH_STRING`](https://phpinternals.net/docs/zend_switch_string) opcode, which performs the same optimisation (but with strings).
+
+[[[additional_information]]]
+For example, the following `switch` statement in PHP:
+```php
+<?php
+
+switch (0) {
+    case 1:break;
+    case 3:break;
+    case 2:break;
+    case 4:break;
+    case 5:break;
+}
+```
+
+Will generate the following opcode dump (via [OPcache](https://phpinternals.net/categories/opcache)):
+```
+L0:     SWITCH_LONG int(0) 1: L12, 3: L13, 2: L14, 4: L15, 5: L16, default: L17
+L1:     T0 = CASE int(0) int(1)
+L2:     JMPNZ T0 L12
+L3:     T0 = CASE int(0) int(3)
+L4:     JMPNZ T0 L13
+L5:     T0 = CASE int(0) int(2)
+L6:     JMPNZ T0 L14
+L7:     T0 = CASE int(0) int(4)
+L8:     JMPNZ T0 L15
+L9:     T0 = CASE int(0) int(5)
+L10:    JMPNZ T0 L16
+L11:    JMP L17
+L12:    JMP L17
+L13:    JMP L17
+L14:    JMP L17
+L15:    JMP L17
+L16:    JMP L17
+L17:    RETURN int(1)
+```
+
+The `ZEND_SWITCH_LONG` opcode will be executed first. If the key being searched for matches the jump table keys, then it will search the jump table for the next relative offset to jump to. Otherwise, the next opcode is executed (thereby using the [`ZEND_CASE`](https://phpinternals.net/docs/zend_case) approach).

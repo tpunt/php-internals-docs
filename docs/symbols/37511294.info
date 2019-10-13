@@ -1,0 +1,38 @@
+[[[id]]]
+37511294
+
+[[[name]]]
+zend_op
+
+[[[url]]]
+zend_op
+
+[[[type]]]
+type
+
+[[[declaration]]]
+typedef struct _zend_op zend_op;
+
+[[[parameters]]]
+
+[[[definition]]]
+struct _zend_op {
+	const void *handler;
+	znode_op op1;
+	znode_op op2;
+	znode_op result;
+	uint32_t extended_value;
+	uint32_t lineno;
+	zend_uchar opcode;
+	zend_uchar op1_type;
+	zend_uchar op2_type;
+	zend_uchar result_type;
+};
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/bc5811f361ead53a803046b128a64d15aba2f2e5/Zend/zend_compile.h#L143
+
+[[[description]]]
+This type is used to store information for an instruction that will be run by the [Zend VM](https://phpinternals.net/categories/zend_virtual_machine). Such information includes the opcode, its operands (and their types), the result (and its type), and so on.
+
+[[[additional_information]]]

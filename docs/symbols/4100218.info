@@ -1,0 +1,35 @@
+[[[id]]]
+4100218
+
+[[[name]]]
+IS_TYPE_REFCOUNTED
+
+[[[url]]]
+is_type_refcounted
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define IS_TYPE_REFCOUNTED (1<<2)
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/ace9fe53173974ec63f9e0357a6e8372ff5adb3b/Zend/zend_types.h#L466
+
+[[[description]]]
+This is used to denote whether a type is reference counted. A [`zval`](https://phpinternals.net/docs/zval) can be checked if it is reference counted via the [`Z_REFCOUNTED`](http://phpinternals.net/docs/z_refcounted) macro.
+
+The following types are refcounted:
+ - [Strings](http://phpinternals.net/categories/zend_strings) (non-interned only)
+ - [Objects](http://phpinternals.net/categories/zend_objects)
+ - [Arrays](http://phpinternals.net/categories/zend_arrays) (mutable only)
+ - Resources
+ - [References](https://phpinternals.net/categories/zend_references)
+
+See the [Garbage Collector](https://phpinternals.net/categories/garbage_collector) for more information on reference counting.
+
+[[[additional_information]]]

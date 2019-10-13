@@ -1,0 +1,49 @@
+[[[id]]]
+10952442
+
+[[[name]]]
+zend_hash_add_ptr
+
+[[[url]]]
+zend_hash_add_ptr
+
+[[[type]]]
+function
+
+[[[declaration]]]
+static zend_always_inline void *zend_hash_add_ptr(HashTable *ht, zend_string *key, void *pData);
+
+[[[parameters]]]
+ht
+The hash table to insert into
+
+key
+The lookup key
+
+pData
+The arbitrary value being inserted
+
+[[[definition]]]
+static zend_always_inline void *zend_hash_add_ptr(HashTable *ht, zend_string *key, void *pData)
+{
+	zval tmp, *zv;
+
+	ZVAL_PTR(&tmp, pData);
+	zv = zend_hash_add(ht, key, &tmp);
+	if (zv) {
+		ZEND_ASSUME(Z_PTR_P(zv));
+		return Z_PTR_P(zv);
+	} else {
+		return NULL;
+	}
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/bc5811f361ead53a803046b128a64d15aba2f2e5/Zend/zend_hash.h#L527
+
+[[[description]]]
+Inserts an arbitrary value into a [`HashTable`](https://phpinternals.net/docs/hashtable) (internally, this value will be wrapped in a [`zval`](https://phpinternals.net/docs/zval) of type [`IS_PTR`](https://phpinternals.net/docs/is_ptr)). See also the corresponding [`zend_hash_find_ptr `](https://phpinternals.net/docs/zend_hash_find_ptr) function to fetch this value from the hash table (that also handles the unwrapping of the zval value).
+
+See also [`zend_hash_str_add_ptr`](https://phpinternals.net/docs/zend_hash_str_add_ptr), the C string variant of this function.
+
+[[[additional_information]]]

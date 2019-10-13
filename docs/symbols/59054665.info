@@ -1,0 +1,37 @@
+[[[id]]]
+59054665
+
+[[[name]]]
+ZVAL_NEW_STR
+
+[[[url]]]
+zval_new_str
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZVAL_NEW_STR(z, s)
+
+[[[parameters]]]
+z
+The zval to set the string value of
+
+s
+The string value being set
+
+[[[definition]]]
+#define ZVAL_NEW_STR(z, s) do {					\
+		zval *__z = (z);						\
+		zend_string *__s = (s);					\
+		Z_STR_P(__z) = __s;						\
+		Z_TYPE_INFO_P(__z) = IS_STRING_EX;		\
+	} while (0)
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/9dada7b291d3fb88a81406cafa5d6fbcb1ee11f0/Zend/zend_types.h#L703
+
+[[[description]]]
+Sets the non-interned string value of a [zval](http://phpinternals.net/docs/zval) (see the [`IS_STRING`](http://phpinternals.net/docs/is_string) type). This is used only if the string being set is known to be non-interned. Otherwise, either the [`ZVAL_STR`](http://phpinternals.net/docs/zval_str) macro (for generic string setting) or the [`ZVAL_INTERNED_STR`](http://phpinternals.net/docs/zval_interned_str) macro (for interned strings) should be used. See the [Zend Strings](https://phpinternals.net/categories/zend_strings) category for further information on string types.
+
+[[[additional_information]]]

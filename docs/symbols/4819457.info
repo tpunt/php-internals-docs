@@ -1,0 +1,28 @@
+[[[id]]]
+4819457
+
+[[[name]]]
+ZVAL_NULL
+
+[[[url]]]
+zval_null
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZVAL_NULL(z)
+
+[[[parameters]]]
+z
+The zval to set to null
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/9dada7b291d3fb88a81406cafa5d6fbcb1ee11f0/Zend/zend_types.h#L657
+
+[[[description]]]
+Sets the given [zval](https://phpinternals.net/docs/zval) to be `null` (see this [`IS_NULL`](https://phpinternals.net/docs/is_null) type).
+
+[[[additional_information]]]

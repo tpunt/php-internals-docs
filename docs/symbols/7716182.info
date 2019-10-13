@@ -1,0 +1,71 @@
+[[[id]]]
+7716182
+
+[[[name]]]
+zend_hash_init
+
+[[[url]]]
+zend_hash_init
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define zend_hash_init(ht, nSize, pHashFunction, pDestructor, persistent) _zend_hash_init((ht), (nSize), (pDestructor), (persistent) ZEND_FILE_LINE_CC)
+
+[[[parameters]]]
+ht
+The allocated [`HashTable *`](https://phpinternals.net/docs/hashtable) to initialise
+
+nSize
+The size to initialise the hash table to
+
+pHashFunction
+Ignored
+
+pDestructor
+The destructor callback. This will most of the time be `ZVAL_PTR_DTOR` (which maps to [`zval_ptr_dtor`](https://phpinternals.net/docs/zval_ptr_dtor))
+
+persistent
+Whether the hash table will be allocated in [persistent memory](https://phpinternals.net/categories/zend_memory_manager#persistent-vs-non-persistent-allocations) (this will be rarely set)
+
+[[[definition]]]
+/* Definition of _zend_hash_init */
+ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
+{
+	GC_REFCOUNT(ht) = 1;
+	GC_TYPE_INFO(ht) = IS_ARRAY | (persistent ? 0 : (GC_COLLECTABLE << GC_FLAGS_SHIFT));
+	ht->u.flags = (persistent ? HASH_FLAG_PERSISTENT : 0) | HASH_FLAG_APPLY_PROTECTION | HASH_FLAG_STATIC_KEYS;
+	ht->nTableMask = HT_MIN_MASK;
+	HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
+	ht->nNumUsed = 0;
+	ht->nNumOfElements = 0;
+	ht->nInternalPointer = HT_INVALID_IDX;
+	ht->nNextFreeElement = 0;
+	ht->pDestructor = pDestructor;
+	ht->nTableSize = zend_hash_check_size(nSize);
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/80745e69143cae33b8acbdcbecb0232738e5475a/Zend/zend_hash.h#L75
+
+[[[description]]]
+Partially (or "softly") initialises an allocated [`HashTable`](https://phpinternals.net/docs/hashtable) - the buckets themselves are not allocated here, and the hash table is not considered fully initialised (the [`HASH_FLAG_INITIALIZED`](https://phpinternals.net/docs/hash_flag_initialised) flag is not set). The hash table becomes fully initialised when either the first element is inserted into it, or when the [`zend_hash_real_init`](https://phpinternals.net/docs/zend_hash_real_init) function is invoked on the hash table.
+
+See also the `array_init` and `array_init_size` macros (they have the same purpose as `zend_hash_init`, but applied to a [`zval`](https://phpinternals.net/docs/zval) instead).
+
+[[[additional_information]]]
+Example:
+```c
+HashTable *ht;
+
+ALLOC_HASHTABLE(ht); // allocate the hash table
+
+zend_hash_init(ht, 0, NULL, ZVAL_PTR_DTOR, 0); // initialise it
+
+// manipulate it...
+
+zend_hash_destroy(ht); // free the buckets
+
+FREE_HASHTABLE(ht); // free the hash table itself
+```

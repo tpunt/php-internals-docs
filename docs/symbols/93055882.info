@@ -1,0 +1,26 @@
+[[[id]]]
+93055882
+
+[[[name]]]
+ZEND_FETCH_CLASS_SILENT
+
+[[[url]]]
+zend_fetch_class_silent
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZEND_FETCH_CLASS_SILENT 0x0100
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/ad25d67d733ae956145b5001184f25888b24eacb/Zend/zend_compile.h#L847
+
+[[[description]]]
+This [Zend Class](https://phpinternals.net/categories/zend_classes) fetching flag is used to prevent an exception from being thrown in the event that an unrecognised class name has been encountered. It is used in places where throwing an exception is not desirable if the class cannot be found, such as by the [`defined`](http://php.net/defined) and [`constant`](http://php.net/constant) PHP functions.
+
+[[[additional_information]]]

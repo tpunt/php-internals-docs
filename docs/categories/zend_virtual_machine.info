@@ -1,0 +1,270 @@
+[[[name]]]
+Zend Virtual Machine
+
+[[[url]]]
+zend_virtual_machine
+
+[[[subcategories]]]
+opcodes
+
+[[[supercategories]]]
+
+[[[articles]]]
+implementing_new_language_constructs_via_opcode_extending
+a_reimplementation_of_the_range_operator
+implementing_a_range_operator_into_php
+
+[[[symbols]]]
+10127797
+87367326
+
+[[[body]]]
+The Zend VM holds the necessary opcode execution logic.
+
+The VM is generated via the [zend\_vm\_gen.php](https://github.com/php/php-src/blob/master/Zend/zend_vm_gen.php) script from the [zend\_vm\_def.h](https://github.com/php/php-src/blob/master/Zend/zend_vm_def.h) definition file. This file contains a number of 'pseudo macros' that are replaced by the zend\_vm\_gen.php script upon VM generation.
+
+# Opcode Handler Specialisation
+
+Opcode handlers specify the types their operands are allowed to be. For example, this is the handler for the `ZEND_INIT_ARRAY` opcode:
+```c
+ZEND_VM_HANDLER(71, ZEND_INIT_ARRAY, CONST|TMP|VAR|CV, CONST|TMPVAR|UNUSED|NEXT|CV, ARRAY_INIT|REF)
+{
+	zval *array;
+	uint32_t size;
+	USE_OPLINE
+
+	array = EX_VAR(opline->result.var);
+	if (OP1_TYPE != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
+
+	if (OP1_TYPE != IS_UNUSED) {
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
+		}
+	}
+
+	ZEND_VM_DISPATCH_TO_HANDLER(ZEND_ADD_ARRAY_ELEMENT);
+}
+```
+
+If the VM is generated with instruction specialisation enabled, then every combination of the above operand types will be generated. This means that each `OP1_TYPE` and `OP2_TYPE` macros can instead be replaced by the respective operand type for that specialised function, causing less branching in the VM at runtime.
+
+So given the above handler, the following variations will be generated (only showing their signatures):
+```c
+ZEND_INIT_ARRAY_SPEC_CONST_CONST_HANDLER
+ZEND_INIT_ARRAY_SPEC_CONST_UNUSED_HANDLER
+ZEND_INIT_ARRAY_SPEC_CONST_CV_HANDLER
+ZEND_INIT_ARRAY_SPEC_CONST_TMPVAR_HANDLER
+ZEND_INIT_ARRAY_SPEC_TMP_CONST_HANDLER
+ZEND_INIT_ARRAY_SPEC_TMP_UNUSED_HANDLER
+ZEND_INIT_ARRAY_SPEC_TMP_CV_HANDLER
+ZEND_INIT_ARRAY_SPEC_TMP_TMPVAR_HANDLER
+ZEND_INIT_ARRAY_SPEC_VAR_CONST_HANDLER
+ZEND_INIT_ARRAY_SPEC_VAR_UNUSED_HANDLER
+ZEND_INIT_ARRAY_SPEC_VAR_CV_HANDLER
+ZEND_INIT_ARRAY_SPEC_VAR_TMPVAR_HANDLER
+ZEND_INIT_ARRAY_SPEC_CV_CONST_HANDLER
+ZEND_INIT_ARRAY_SPEC_CV_UNUSED_HANDLER
+ZEND_INIT_ARRAY_SPEC_CV_CV_HANDLER
+ZEND_INIT_ARRAY_SPEC_CV_TMPVAR_HANDLER
+```
+
+That's **16** specialisations for one handler! (Whilst `NEXT` is specified as an operand type, it isn't actually a type, but rather an operand flag. It is therefore not used in combination with the other operand types.)
+
+These specialisations now mean that branches such as the following:
+```c
+if (OP1_TYPE != IS_UNUSED) {
+	size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+} else {
+	size = 0;
+}
+// ...
+if (OP1_TYPE != IS_UNUSED) {
+	if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+		zend_hash_real_init(Z_ARRVAL_P(array), 0);
+	}
+}
+```
+
+Can be replaced by code such as:
+```c
+if (CV != IS_UNUSED) {
+	size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+} else {
+	size = 0;
+}
+// ...
+if (CV != IS_UNUSED) {
+	if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+		zend_hash_real_init(Z_ARRVAL_P(array), 0);
+	}
+}
+```
+
+The constant comparison (`CV != IS_UNUSED`) will be optimised away by the C compiler, causing two less branches for this instruction. (For the sake of simpler code generation, the VM generator does not bother to skip the generation of constant comparisons like in the above. This is simply left up to the C compiler to figure out.)
+
+The cost for this optimisation is, of course, the drastic increase in the size of the VM. Generating a VM without instruction specialisation (using the [Call threading model](https://phpinternals.net/categories/zend_virtual_machine#call)) will be ~9200 lines of code, but with instruction specialisation (and using same threading model), the VM will be ~60300 lines of code.
+
+# Threading
+
+...
+
+## Direct and Indirect Threading
+
+...
+
+## Threading Models
+
+PHP's virtual machine can be generated to use one of four threading models: call, goto, switch, and hybrid. The threading model pertains to how instructions are dispatched in the main execution loop, where each approach has its tradeoffs between VM size, branch prediction, memory requirements, and so on.
+
+### Switch
+
+The Switch threading model uses a giant switch statement to jump through the opcodes of the currently executing opline. This looks something like the following:
+```c
+ZEND_API void execute_ex(zend_execute_data *execute_data)
+{
+	while (1) {
+zend_vm_continue:
+		switch (EX(opline)->handler) {
+			case 0:
+				// opcode handler code here
+
+				ZEND_VM_NEXT_OPCODE(); // ++EX(opline); goto zend_vm_continue;
+			case 1:
+				// opcode handler code here
+
+				ZEND_VM_NEXT_OPCODE(); // ++EX(opline); goto zend_vm_continue;
+			// ~1300 cases later (with opcode specialisation enabled)
+			default:
+				// unknown opcode
+	}
+}
+```
+
+The `handler` member of a [`zend_op`](https://phpinternals.net/docs/zend_op) structure holds an offset into the switch statement for this threading model (as opposed to a function callback, as seen in the [Call threading model](https://phpinternals.net/categories/zend_virtual_machine#call)).
+
+A global register for the instruction pointer (the currently executing opline) may be utilised if global registers are supported by GCC (to provide faster access to the current instruction).
+
+Advantages:
+ - Easy to generate
+
+Disadvantages:
+ - It is very unfriendly for the branch predictor. This is because the single jump point of the `switch` statement can go to any of the ~1300 branches of the switch statement. This typically makes it slower than the other threading models
+ - It requires bounds checking on the value (causing additional branching per instruction executed)
+
+### Call
+
+The Call threading model was the default VM kind prior to PHP 7.2 (with the default now being the [Hybrid threading model](https://phpinternals.net/categories/zend_virtual_machine#hybrid)). It works by iterating through the opcodes ([`zend_op`](https://phpinternals.net/docs/zend_op) structures), and invoking their respective handlers. (These function callbacks are held in the `handler` member of a [`zend_op`](https://phpinternals.net/docs/zend_op) structure). It looks something like the following:
+```c
+ZEND_API void execute_ex(zend_execute_data *execute_data)
+{
+	while (1) {
+		int ret = EX(opline)->handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+
+		// check ret
+	}
+}
+
+// handler example
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_EXAMPLE_OPCODE_1_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	// handler code
+
+	ZEND_VM_NEXT_OPCODE(); // ++EX(opline);
+	// if ZEND_VM_TAIL_CALL_DISPATCH
+	// ((opcode_handler_t)EX(opline)->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+}
+```
+
+The continuation to the next opcode is handled by the subroutine handler being executed (via the `ZEND_VM_NEXT_OPCODE` macro, in the above).
+
+You may have noticed that parameter declarations of opcode handlers, as well as argument passing to these handlers, is abstracted away behind macros. The reason for this is because the current execution data may be passed either as an argument to the handler, or if GCC supports it, then it may simply be stored in a global register (either `%esi`, `%r14`, or `%r28`, depending upon the architecture).
+
+The Call threading model also has a tail call optimisation. This is where the subroutine handler can invoke the next opcode handler in situations where the return value of the current subroutine does not matter. This prevents the overhead of checking the return value (causing unnecessary branching in the tight loop of the executor).
+
+This threading model produces *subroutine-threaded* code. Subroutine threading is generally slightly slower than direct threading.
+
+Advantages:
+ - ...
+
+Disadvantages:
+ - ...
+
+### Goto
+
+The Goto threading model utilises the following two compiler features: [labels as values and computed goto statements](https://gcc.gnu.org/onlinedocs/gcc-3.1/gcc/Labels-as-Values.html). It works by iterating through the opcodes ([`zend_op`](https://phpinternals.net/docs/zend_op) structures), and jumping to the labels in their respective handlers. It looks something like the following:
+```c
+ZEND_API void execute_ex(zend_execute_data *execute_data)
+{
+	static const void* labels[] = {
+		// label values list
+	};
+
+	while (1) {
+		goto *(void**)(EX(opline)->handler);
+
+ZEND_EXAMPLE_OPCODE_1_LABEL:
+		ZEND_VM_GUARD(ZEND_EXAMPLE_OPCODE_1);
+		{
+			// handler code
+
+			ZEND_VM_NEXT_OPCODE();
+		}
+
+ZEND_EXAMPLE_OPCODE_2_LABEL:
+		ZEND_VM_GUARD(ZEND_EXAMPLE_OPCODE_2);
+		{
+			// handler code
+
+			ZEND_VM_NEXT_OPCODE();
+		}
+
+// labels for other opcodes...
+	}
+}
+```
+
+As with the [Switch threading model](https://phpinternals.net/categories/zend_virtual_machine#switch), continuation to the next opcode is handled by the nested subroutine handler being executed (done by the `ZEND_VM_NEXT_OPCODE` macro).
+
+Advantages:
+ - Very fast dispatching
+ - Good for branch prediction. This is because the jumps occur at different locations (at the end of each opcode body), and so the branch predictor can make separate predictions for each jump location. This improves the branch prediction accuracy due to a smaller number of possible jumps that can be taken from each jump point. It is typical for patterns to emerge from these jump points (e.g. a jump from a [`ZEND_CASE`](https://phpinternals.net/docs/zend_case) opcode will be a `ZEND_JMPNZ` opcode)
+
+Disadvantages:
+ - Poor register allocation
+
+### Hybrid
+
+The Hybrid VM was introduced as an optimisation in PHP 7.2, where it provided a small speedup (a few percentage or so) on real-life applications, and a far greater speedup on synthetic benchmarks (up to 50 percent). (This would be because the comparative overhead of instruction dispatching to instruction execution is proportionally larger in synthetic benchmarks.) It is effectively a combination of the [Goto](https://phpinternals.net/categories/zend_virtual_machine#goto) and [Call](https://phpinternals.net/categories/zend_virtual_machine#call) threading models, where opcode handlers store the labels to jump to, and the label jump targets invoke their respective opcode subroutines:
+```c
+ZEND_API void execute_ex(zend_execute_data *execute_data)
+{
+	static const void* labels[] = {
+		// label values list
+	};
+
+	HYBRID_SWITCH() { // goto *(void**)(EX(opline)->handler)
+		HYBRID_CASE(ZEND_EXAMPLE_OPCODE_1): // ZEND_EXAMPLE_OPCODE_1_LABEL:
+			ZEND_EXAMPLE_OPCODE_1_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); // call opcode handler
+			HYBRID_BREAK(); // goto *(void**)(EX(opline)->handler)
+		HYBRID_CASE(ZEND_EXAMPLE_OPCODE_2): // ZEND_EXAMPLE_OPCODE_2_LABEL:
+			ZEND_EXAMPLE_OPCODE_2_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); // call opcode handler
+			HYBRID_BREAK(); // goto *(void**)(EX(opline)->handler)
+		// cases for other opcodes...
+	}
+}
+```
+
+Hot opcode handlers in the VM will be marked for inlining, and so they should end up being inlined in the body of the label jump target (as seen in the normal [Goto threading model](https://phpinternals.net/categories/zend_virtual_machine#goto)). Dispatching to other opcode handlers should follow the [Call threading model](https://phpinternals.net/categories/zend_virtual_machine#call) (jump to the label, then invoke the opcode handler subroutine). This means that if all opcodes were marked has hot, we would (in theory) end up with the [Goto threading model](https://phpinternals.net/categories/zend_virtual_machine#goto).
+
+Combining these two threading models means that the benefits of using computed goto statements (better branch prediction) can be combined with the benefits of using subroutines as opcode handlers (...).
+
+The Hybrid threading model may only be used when the following conditions are met:
+ - GCC is at least version 4.8.0 (...), and
+ - when the computed goto extension for GCC, and
+ - when global registers are enabled (could be done without this, but not yet supported)

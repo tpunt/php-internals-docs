@@ -1,0 +1,56 @@
+[[[id]]]
+54379398
+
+[[[name]]]
+ZEND_USER_OPCODE_DISPATCH
+
+[[[url]]]
+zend_user_opcode_dispatch
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZEND_USER_OPCODE_DISPATCH 2
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/7c9556db99a63449cc4b2635a560bacb63d868c9/Zend/zend_execute.h#L309
+
+[[[description]]]
+This return type for an overloaded opcode (see [`zend_set_user_opcode_handler`](https://phpinternals.net/docs/zend_set_user_opcode_handler#how-it-works)) means that execution of overloaded opcode should continue as normal.
+
+See also:
+ - [`ZEND_USER_OPCODE_CONTINUE`](https://phpinternals.net/docs/zend_user_opcode_continue)
+ - [`ZEND_USER_OPCODE_RETURN`](https://phpinternals.net/docs/zend_user_opcode_return)
+ - `ZEND_USER_OPCODE_ENTER`
+ - `ZEND_USER_OPCODE_LEAVE`
+
+[[[additional_information]]]
+For example, if we wanted to prepend `Echoing: ` to the output of either `echo` or `print`, then we would do something like:
+```c
+static inline int overload_echo(zend_execute_data *execute_data) {
+    php_printf("Echoing: ");
+    return ZEND_USER_OPCODE_DISPATCH;
+}
+
+PHP_MINIT_FUNCTION(custom_extension)
+{
+    zend_set_user_opcode_handler(ZEND_ECHO, overload_echo);
+
+    return SUCCESS;
+}
+```
+
+Now, executing the following PHP script:
+```php
+echo 1;
+```
+
+Outputs:
+```
+Echoing: 1
+```

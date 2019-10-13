@@ -1,0 +1,29 @@
+[[[id]]]
+79087183
+
+[[[name]]]
+Z_REF
+
+[[[url]]]
+z_ref
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define Z_REF(zval) (zval).value.ref
+
+[[[parameters]]]
+zval
+The zval to fetch the referenced value of
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/9dada7b291d3fb88a81406cafa5d6fbcb1ee11f0/Zend/zend_types.h#L629
+
+[[[description]]]
+Fetches the value of a referenced zval (see the [`IS_REFERENCE`](http://phpinternals.net/docs/is_reference) data type).
+
+[[[additional_information]]]
+This macro also has a counterpart macro, `Z_REF_P`, that accepts a pointer to a zval instead.

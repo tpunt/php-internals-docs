@@ -1,0 +1,29 @@
+[[[id]]]
+18294965
+
+[[[name]]]
+Z_TYPE
+
+[[[url]]]
+z_type
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define Z_TYPE(zval) zval_get_type(&(zval))
+
+[[[parameters]]]
+zval
+The zval to get the type of
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/ace9fe53173974ec63f9e0357a6e8372ff5adb3b/Zend/zend_types.h#L399
+
+[[[description]]]
+Retrieves the type of a zval (in a read-only way). If the type information of a zval needs to be set, then the [`Z_TYPE_INFO`](http://phpinternals.net/docs/z_type_info) macro should be used instead.
+
+[[[additional_information]]]
+This macro also has a counterpart macro, `Z_TYPE_P`, that accepts a pointer to a zval instead.

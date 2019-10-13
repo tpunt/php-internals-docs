@@ -1,0 +1,29 @@
+[[[id]]]
+45837082
+
+[[[name]]]
+Z_STRHASH
+
+[[[url]]]
+z_strhash
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define Z_STRHASH(zval) ZSTR_HASH(Z_STR(zval))
+
+[[[parameters]]]
+zval
+The zval to access the string value's hash from
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/272a9f29f5cba3050132e68f7303820743982822/Zend/zend_types.h#L587
+
+[[[description]]]
+Fetches the string value's hash from the given [zval](http://phpinternals.net/docs/zval) (see the [`IS_STRING`](http://phpinternals.net/docs/is_string) type).
+
+[[[additional_information]]]
+This macro also has a counterpart macro, `Z_STRHASH_P`, that accepts a pointer to a zval instead.

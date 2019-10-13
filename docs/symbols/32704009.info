@@ -1,0 +1,76 @@
+[[[id]]]
+32704009
+
+[[[name]]]
+ZEND_ADD
+
+[[[url]]]
+zend_add
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZEND_ADD 1
+
+[[[parameters]]]
+
+[[[definition]]]
+ZEND_VM_HANDLER(1, ZEND_ADD, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op2;
+	zval *op1, *op2, *result;
+
+	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+	if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			fast_long_add_function(result, op1, op2);
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) + Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) + Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) + ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
+
+	SAVE_OPLINE();
+	if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	add_function(EX_VAR(opline->result.var), op1, op2);
+	FREE_OP1();
+	FREE_OP2();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/a94fc577af6bfef3a623cded5aecc2dbb9710e85/Zend/zend_vm_def.h#L28
+
+[[[description]]]
+This opcode is used for the addition operator.
+
+Quick overview:
+ - `op1` - left operand
+ - `op2` - right operand
+ - `result` - addition result
+ - `extended_value` - unused
+ - `op1_type` - CONST|TMPVAR|CV
+ - `op2_type` - CONST|TMPVAR|CV
+
+[[[additional_information]]]

@@ -1,0 +1,45 @@
+[[[id]]]
+26736591
+
+[[[name]]]
+ZEND_ARG_VARIADIC_INFO
+
+[[[url]]]
+zend_arg_variadic_info
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZEND_ARG_VARIADIC_INFO(pass_by_ref, name)
+
+[[[parameters]]]
+pass_by_ref
+whether the argument passed by reference or value
+
+name
+argument name
+
+[[[definition]]]
+#define ZEND_ARG_VARIADIC_INFO(pass_by_ref, name) \
+    { #name, 0, pass_by_ref, 1 },
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/378aeb86854a0e244b2f1528694b595660b7d533/Zend/zend_API.h#L103
+
+[[[description]]]
+Argument information for built-in functions is important for the sake of the reflection API.
+
+The `ZEND_ARG_VARIADIC_INFO` macro is used to indicate a [variadic argument](https://www.php.net/manual/en/functions.arguments.php#functions.variable-arg-list). This macro doesn't specify the type of the argument.
+
+### Example of a variadic argument
+
+    function sum(...$numbers) {
+    }
+
+[[[additional_information]]]
+### Example
+
+    ZEND_BEGIN_ARG_INFO_EX(arginfo_min, 0, 0, 1)
+        ZEND_ARG_VARIADIC_INFO(0, args)
+    ZEND_END_ARG_INFO()

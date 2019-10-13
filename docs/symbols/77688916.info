@@ -1,0 +1,30 @@
+[[[id]]]
+77688916
+
+[[[name]]]
+IS_STR_PERSISTENT
+
+[[[url]]]
+is_str_persistent
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define IS_STR_PERSISTENT (1<<0)
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/9dada7b291d3fb88a81406cafa5d6fbcb1ee11f0/Zend/zend_types.h#L492
+
+[[[description]]]
+This [garbage collector](https://phpinternals.net/categories/garbage_collector) flag is used specifically for strings to denote a persistent string.
+
+Persistent strings are used for when a string will be needed across multiple requests. They are allocated as persistent memory (see the [Zend Memory Manager](http://phpinternals.net/categories/zend_memory_manager) for further information on this), and so they will not be automatically cleaned up at the end of each request cycle. This means that they should not be created during the request cycle.
+
+Persistent strings are typically created upon module initialisation and cleaned up on module shutdown. They are reference counted along with their counterpart non-persistent strings (unlike interned strings).
+
+[[[additional_information]]]

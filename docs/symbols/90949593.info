@@ -1,0 +1,37 @@
+[[[id]]]
+90949593
+
+[[[name]]]
+HASH_FLAG_APPLY_PROTECTION
+
+[[[url]]]
+hash_flag_apply_protection
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define HASH_FLAG_APPLY_PROTECTION (1<<1)
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/f18a00b8ce30d9f3f96090c63d575b5d3557d9b5/Zend/zend_hash.h#L39
+
+[[[description]]]
+This flag denotes a [`HashTable`](https://phpinternals.net/docs/hashtable) that requires protection when a deep iteration is performed on it (where all of its members, their members in turn, and so on, are touched). This is used to prevent infinite recursion, and is typically used when outputting arrays in PHP.
+
+Whilst this flag is generally set, there are times when it does not have to be. These include immutable arrays (see [`IS_ARRAY_IMMUTABLE`](https://phpinternals.net/docs/is_array_immutable)), and when the hash table is used internally (such as for the functions symbol table), where it is known that the types being stored cannot form cyclic relationships.
+
+The [`ZEND_HASH_APPLY_PROTECTION`](https://phpinternals.net/docs/zend_hash_apply_protection) macro should be used to check if a hash table has protection from recursion.
+
+[[[additional_information]]]
+For example:
+```c
+zend_bool has_protection(HashTable *ht)
+{
+    return !!(ht->u.flags & HASH_FLAG_APPLY_PROTECTION);
+}
+```

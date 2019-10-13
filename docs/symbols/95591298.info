@@ -1,0 +1,50 @@
+[[[id]]]
+95591298
+
+[[[name]]]
+zend_parse_parameters_ex
+
+[[[url]]]
+zend_parse_parameters_ex
+
+[[[type]]]
+function
+
+[[[declaration]]]
+ZEND_API int zend_parse_parameters_ex(int flags, int num_args, const char *type_spec, ...)
+
+[[[parameters]]]
+flags
+Change the default behaviour (valid flags: [`ZEND_PARSE_PARAMS_QUIET`](https://phpinternals.net/docs/zend_parse_params_quiet) and [`ZEND_PARSE_PARAMS_THROW`](https://phpinternals.net/docs/zend_parse_params_throw))
+
+num_args
+The number of arguments provided by the function call. This is typically acquired by the `ZEND_NUM_ARGS` macro
+
+type_spec
+A string-literal detailing the parameter parsing of the function
+
+...
+The variables to store the parsed arguments in
+
+[[[definition]]]
+ZEND_API int zend_parse_parameters_ex(int flags, int num_args, const char *type_spec, ...)
+{
+	va_list va;
+	int retval;
+
+	va_start(va, type_spec);
+	retval = zend_parse_va_args(num_args, type_spec, &va, flags);
+	va_end(va);
+
+	return retval;
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/5b61c399fc69c7442e4b6641109456aa9a59261f/Zend/zend_API.c#L970
+
+[[[description]]]
+This is the old parameter parsing function. Upon failure to parse the arguments, an `E_WARNING` is emitted. The newer (macro-based) API is generally preferred now because it incurs less parsing overhead.
+
+This extended version of [`zend_parse_parameters`](https://phpinternals.net/docs/zend_parse_parameters) enables for behavioural flags to be past in, where either of the following flags may be used: [`ZEND_PARSE_PARAMS_QUIET`](https://phpinternals.net/docs/zend_parse_params_quiet) or [`ZEND_PARSE_PARAMS_THROW`](https://phpinternals.net/docs/zend_parse_params_throw) ([`zend_parse_parameters_throw`](https://phpinternals.net/docs/zend_parse_parameters_throw) is typically used instead of this flag for terseness). See these flags for examples on their usage.
+
+[[[additional_information]]]

@@ -1,0 +1,39 @@
+[[[id]]]
+45119963
+
+[[[name]]]
+instanceof_function
+
+[[[url]]]
+instanceof_function
+
+[[[type]]]
+function
+
+[[[declaration]]]
+ZEND_API zend_bool ZEND_FASTCALL instanceof_function(const zend_class_entry *instance_ce, const zend_class_entry *ce)
+
+[[[parameters]]]
+instance_ce
+The class entry being checked
+
+ce
+The class entry being checked against
+
+[[[definition]]]
+ZEND_API zend_bool ZEND_FASTCALL instanceof_function(const zend_class_entry *instance_ce, const zend_class_entry *ce) /* {{{ */
+{
+	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+		return instanceof_interface(instance_ce, ce);
+	} else {
+		return instanceof_class(instance_ce, ce);
+	}
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/80745e69143cae33b8acbdcbecb0232738e5475a/Zend/zend_operators.c#L2251
+
+[[[description]]]
+Checks to see if a class entry is an instance of another class entry.
+
+[[[additional_information]]]

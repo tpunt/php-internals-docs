@@ -1,0 +1,32 @@
+[[[id]]]
+63093861
+
+[[[name]]]
+zend_stack_is_empty
+
+[[[url]]]
+zend_stack_is_empty
+
+[[[type]]]
+function
+
+[[[declaration]]]
+ZEND_API int zend_stack_is_empty(const zend_stack *stack);
+
+[[[parameters]]]
+stack
+The stack being checked
+
+[[[definition]]]
+ZEND_API int zend_stack_is_empty(const zend_stack *stack)
+{
+	return stack->top == 0;
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/ec2823fb8c090c0d71f231c18a609d28b5b7b240/Zend/zend_stack.c#L76
+
+[[[description]]]
+Checks to see if the stack is empty.
+
+[[[additional_information]]]

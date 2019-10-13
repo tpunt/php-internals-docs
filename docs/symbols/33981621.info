@@ -1,0 +1,26 @@
+[[[id]]]
+33981621
+
+[[[name]]]
+RETVAL_NULL
+
+[[[url]]]
+retval_null
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define RETVAL_NULL() ZVAL_NULL(return_value)
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/9ae9533b90403fdf26596cd105ef7f85e0ce86ed/Zend/zend_API.h#L636
+
+[[[description]]]
+A shorthand macro to set the return value (typically from inside [`ZEND_FUNCTION`](https://phpinternals.net/docs/zend_function) or [`ZEND_METHOD`](https://phpinternals.net/docs/zend_method)) to `null`.
+
+[[[additional_information]]]

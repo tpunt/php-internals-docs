@@ -1,0 +1,39 @@
+[[[id]]]
+58233211
+
+[[[name]]]
+ZEND_ACC_FINAL
+
+[[[url]]]
+zend_acc_final
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZEND_ACC_FINAL 0x04
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/1599c6ee38c2604540160823d5b4e9780aada74a/Zend/zend_compile.h#L215
+
+[[[description]]]
+This flag is used for both Zend Functions and [Zend Classes](https://phpinternals.net/categories/zend_classes), where it marks a function or class as being final. This is used to prevent violations of this constraint at both compile-time (such as class definitions) and runtime (such as anonymous class definitions).
+
+[[[additional_information]]]
+For example, we can set this flag on a class entry during class registration by:
+```c
+PHP_MINIT_FUNCTION(ext_name)
+{
+    zend_class_entry ce;
+
+    INIT_CLASS_ENTRY(ce, "NewClass", NewClass_methods);
+
+    NewClass_ce = zend_register_internal_class(&ce);
+
+    NewClass_ce->ce_flags |= ZEND_ACC_FINAL; // line of interest
+}
+```

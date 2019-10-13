@@ -1,0 +1,65 @@
+[[[id]]]
+12935005
+
+[[[name]]]
+Z_PARAM_OPTIONAL
+
+[[[url]]]
+z_param_optional
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define Z_PARAM_OPTIONAL _optional = 1;
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/ebb339625d9b1335a1dcb7ab355d27d999f7413b/Zend/zend_API.h#L805
+
+[[[description]]]
+Marks all parameters following this as being optional.
+
+[[[additional_information]]]
+For example, let's create a function that optionally accepts an integer and then outputs it:
+```c
+/* argument information */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ optional_int, 0, 0, 0)
+	ZEND_ARG_INFO(0, arg)
+ZEND_END_ARG_INFO()
+
+/* void optional_int([int $arg]) */
+PHP_FUNCTION(optional_int)
+{
+	zend_long arg = 42; // default value
+
+	// new API
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(arg)
+	ZEND_PARSE_PARAMETERS_END();
+
+	/* old API
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &arg) == FAILURE) {
+		return;
+	}
+	*/
+
+	php_printf("int(" ZEND_LONG_FMT ")\n", arg);
+}
+```
+
+Usage:
+```php
+optional_int();
+optional_int(3);
+```
+
+Output:
+```
+int(42)
+int(3)
+```

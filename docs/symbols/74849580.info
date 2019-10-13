@@ -1,0 +1,36 @@
+[[[id]]]
+74849580
+
+[[[name]]]
+ZVAL_OBJ
+
+[[[url]]]
+zval_obj
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZVAL_OBJ(z, o)
+
+[[[parameters]]]
+z
+The [`zval *`](https://phpinternals.net/docs/zval) to set the object value of
+
+o
+The [`zend_object *`](https://phpinternals.net/docs/zend_object) value being set
+
+[[[definition]]]
+#define ZVAL_OBJ(z, o) do {						\
+		zval *__z = (z);						\
+		Z_OBJ_P(__z) = (o);						\
+		Z_TYPE_INFO_P(__z) = IS_OBJECT_EX;		\
+	} while (0)
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/17b39f1216bf213838c7975d266808d4bc7ffb4c/Zend/zend_types.h#L745
+
+[[[description]]]
+Sets the object value of a [`zval`](https://phpinternals.net/docs/zval) (see the [`IS_OBJECT`](https://phpinternals.net/docs/is_object) type).
+
+[[[additional_information]]]

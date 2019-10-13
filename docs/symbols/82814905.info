@@ -1,0 +1,32 @@
+[[[id]]]
+82814905
+
+[[[name]]]
+zend_string
+
+[[[url]]]
+zend_string
+
+[[[type]]]
+type
+
+[[[declaration]]]
+typedef struct _zend_string zend_string;
+
+[[[parameters]]]
+
+[[[definition]]]
+struct _zend_string {
+	zend_refcounted_h gc;
+	zend_ulong        h;
+	size_t            len;
+	char              val[1];
+};
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/797ee05a3c4c4ea9f1817930c92e50be6ef63da7/Zend/zend_types.h#L221
+
+[[[description]]]
+The binary-safe, string-storing type.
+
+[[[additional_information]]]

@@ -1,0 +1,31 @@
+[[[id]]]
+98773379
+
+[[[name]]]
+ZVAL_TRUE
+
+[[[url]]]
+zval_true
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZVAL_TRUE(z)
+
+[[[parameters]]]
+z
+The zval to set to true
+
+[[[definition]]]
+#define ZVAL_TRUE(z) do {				\
+		Z_TYPE_INFO_P(z) = IS_TRUE;		\
+	} while (0)
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/c8efaea1e3f93b5b836a38c6985b67983b1dc95a/Zend/zend_types.h#L665
+
+[[[description]]]
+Sets the value of a [zval](https://phpinternals.net/docs/zval) to true (see the [`IS_TRUE`](https://phpinternals.net/docs/is_true) type).
+
+[[[additional_information]]]

@@ -1,0 +1,28 @@
+[[[id]]]
+11051937
+
+[[[name]]]
+HT_IS_PACKED
+
+[[[url]]]
+ht_is_packed
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define HT_IS_PACKED(ht) (((ht)->u.flags & HASH_FLAG_PACKED) != 0)
+
+[[[parameters]]]
+ht
+The [`HashTable *`](https://phpinternals.net/docs/hashtable) variable to check
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/f18a00b8ce30d9f3f96090c63d575b5d3557d9b5/Zend/zend_hash.h#L46
+
+[[[description]]]
+Checks to see if a [`HashTable`](https://phpinternals.net/docs/hashtable) is packed (see [`HASH_FLAG_PACKED`](https://phpinternals.net/docs/hash_flag_packed)).
+
+[[[additional_information]]]

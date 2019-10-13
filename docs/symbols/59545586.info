@@ -1,0 +1,35 @@
+[[[id]]]
+59545586
+
+[[[name]]]
+Z_TRY_ADDREF
+
+[[[url]]]
+z_try_addref
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define Z_TRY_ADDREF(z) Z_TRY_ADDREF_P(&(z))
+
+[[[parameters]]]
+z
+The zval to try to add a reference to
+
+[[[definition]]]
+/* Definition for Z_TRY_ADDREF_P */
+#define Z_TRY_ADDREF_P(pz) do {		\
+	if (Z_REFCOUNTED_P((pz))) {		\
+		Z_ADDREF_P((pz));			\
+	}								\
+} while (0)
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/31e4afe3c3654f9c5ab2eafa3a02c62d41c58b47/Zend/zend_types.h#L877
+
+[[[description]]]
+This macro attempts to increment the reference count of the given zval. This will only occur if the zval is a reference counted type (see [`IS_TYPE_REFCOUNTED`](http://phpinternals.net/docs/is_type_refcounted) for further information on refcounted types). If it is known that the zval is refcounted, then the [`Z_ADDREF`](https://phpinternals.net/docs/z_addref) macro can be used instead.
+
+[[[additional_information]]]
+This macro also has a counterpart macro, `Z_TRY_ADDREF_P`, that accepts a pointer to a zval instead.

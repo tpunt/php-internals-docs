@@ -1,0 +1,38 @@
+[[[id]]]
+47248793
+
+[[[name]]]
+ZEND_ASSIGN_BW_XOR
+
+[[[url]]]
+zend_assign_bw_xor
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZEND_ASSIGN_BW_XOR 33
+
+[[[parameters]]]
+
+[[[definition]]]
+ZEND_VM_HANDLER(33, ZEND_ASSIGN_BW_XOR, VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
+{
+	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_helper, binary_op, bitwise_xor_function);
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/dd15b34018db8a5ba48a79981f7915fd02092b9d/Zend/zend_vm_def.h#L1042
+
+[[[description]]]
+This opcode is used for the compound assignment (bitwise XOR) operator.
+
+Quick overview:
+ - `op1` - left operand
+ - `op2` - right operand
+ - `result` - bitwise XOR result
+ - `extended_value` - unused
+ - `op1_type` - VAR|UNUSED|THIS|CV
+ - `op2_type` - CONST|TMPVAR|UNUSED|NEXT|CV
+
+[[[additional_information]]]

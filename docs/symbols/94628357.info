@@ -1,0 +1,41 @@
+[[[id]]]
+94628357
+
+[[[name]]]
+Z_REFCOUNTED
+
+[[[url]]]
+z_refcounted
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define Z_REFCOUNTED(zval) ((Z_TYPE_FLAGS(zval) & IS_TYPE_REFCOUNTED) != 0)
+
+[[[parameters]]]
+zval
+The [`zval`](https://phpinternals.net/docs/zval) to check if its value is reference-counted
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/ace9fe53173974ec63f9e0357a6e8372ff5adb3b/Zend/zend_types.h#L532
+
+[[[description]]]
+Checks to see if the value of the given [`zval`](https://phpinternals.net/docs/zval) is reference-counted (see [`IS_TYPE_REFCOUNTED`](https://phpinternals.net/docs/is_type_refcounted)).
+
+This macro also has a counterpart macro, `Z_REFCOUNTED_P`, that accepts a pointer to a `zval` instead.
+
+[[[additional_information]]]
+For example:
+```c
+void is_refcounted(zval *z)
+{
+    if (Z_REFCOUNTED_P(z)) {
+        php_printf("This zval is reference-counted\n");
+    } else {
+        php_printf("This zval is not reference-counted\n");
+    }
+}
+```

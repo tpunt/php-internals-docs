@@ -1,0 +1,53 @@
+[[[id]]]
+94132293
+
+[[[name]]]
+zend_read_property
+
+[[[url]]]
+zend_read_property
+
+[[[type]]]
+function
+
+[[[declaration]]]
+ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const char *name, size_t name_length, zend_bool silent, zval *rv)
+
+[[[parameters]]]
+scope
+Class scope
+
+object
+Instantiated object
+
+name
+Property name
+
+name_length
+Length of the property name
+
+silent
+Suppress notice if the property is undefined
+
+rv
+Used internally by the function call interface to set the property as the return value
+
+[[[definition]]]
+ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const char *name, size_t name_length, zend_bool silent, zval *rv) /* {{{ */
+{
+	zval *value;
+	zend_string *str;
+
+	str = zend_string_init(name, name_length, 0);
+	value = zend_read_property_ex(scope, object, str, silent, rv);
+	zend_string_release_ex(str, 0);
+	return value;
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/878e09c47c1f33e2c0140ecedbf8eea9c15cd851/Zend/zend_API.c#L4103
+
+[[[description]]]
+Get the value of a property of an object.
+
+[[[additional_information]]]

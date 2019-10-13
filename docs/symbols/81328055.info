@@ -1,0 +1,26 @@
+[[[id]]]
+81328055
+
+[[[name]]]
+IS_PTR
+
+[[[url]]]
+is_ptr
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define IS_PTR 17
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/bc5811f361ead53a803046b128a64d15aba2f2e5/Zend/zend_types.h#L386
+
+[[[description]]]
+This internal type is used for things such as wrapping arbitrary values in [`zval`](https://phpinternals.net/docs/zval)s so that they can be inserted as values into a [`HashTable`](https://phpinternals.net/docs/hashtable).
+
+[[[additional_information]]]

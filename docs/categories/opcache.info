@@ -1,0 +1,231 @@
+[[[name]]]
+OPcache
+
+[[[url]]]
+opcache
+
+[[[subcategories]]]
+
+[[[supercategories]]]
+
+[[[articles]]]
+
+[[[symbols]]]
+
+[[[body]]]
+OPcache does more than simply cache the opcodes generated during the initial compilation phase. It also applies various optimisations at the opcode level for improved runtime performance, as well as packing PHP's JIT compiler (at the time of writing, at least).
+
+## The Optimisation Levels of OPcache
+
+OPcache exposes a number of different optimisation levels. Each optimisation level causes a new pass to be performed over the generated opcodes. So the higher the optimisation level, the more rigorous OPcache can optimise the opcodes, and consequently the longer it will take to compile the PHP scripts.
+
+The OPcodes will be inspected using the [VLD extension](https://github.com/derickr/vld), since I feel that the output of this is friendlier to look at. You may follow along with your own installation of PHP by using the following command:
+```
+php -dvld.active=1 -dvld.execute=0 -dopcache.enable_cli=1 -dopcache.optimization_level=0 script.php
+```
+
+It's also worth noting that optimisations from the compilation stage overlap with some of OPcache's optimisations, and so the optimisations of each level of OPcache will not always be noticeable. See the [Optimisations](https://phpinternals.net/categories/compiler#optimisations) section of the [Compiler](https://phpinternals.net/categories/compiler) for more information on this. Also see the [Namespacing and Optimisations](https://phpinternals.net/categories/compiler#namespacing-and-optimisations) section for when optimisations cannot be applied.
+
+### Optimisation Pass 1
+
+`opcache.optimization_level=1`
+
+At this level, the following operations will be optimised if they have constant or literal operands or arguments:
+ - arithmetic, boolean, and bitwise operations
+ - explicit casts
+ - certain internal function calls: `strlen`, `dirname`, `constant`, `extension_loaded`, `define`, `defined`, `is_callable`, `function_exists` (the last 3 must refer to built-in constants/functions)
+
+OPcache's first optimisation level comes into play when either constants are involved in the arithmetic, or when casting is used. The reason why constants cannot be resolved during the initial compilation phase (during AST traversal) is because the constant being referenced may not have had its definition parsed yet. This means the constant will not be resolvable since its value will not be available in the constants hash table of the compiler globals structure. Let's take a quick look at an example.
+
+Without optimisation, the following:
+```php
+define('A', strlen((string) ~1));
+```
+
+Yields:
+```
+line     #* E I O op                           fetch          ext  return  operands
+-------------------------------------------------------------------------------------
+   3     0  E >   INIT_FCALL                                               'define'
+         1        SEND_VAL                                                 'A'
+         2        CAST                                          6  ~0      -2
+         3        STRLEN                                           ~1      ~0
+         4        SEND_VAL                                                 ~1
+         5        DO_ICALL                                                 
+   4     6      > RETURN                                                   1
+```
+
+But with the first optimisation pass, we get:
+```
+line     #* E I O op                           fetch          ext  return  operands
+-------------------------------------------------------------------------------------
+   3     0  E >   NOP                                                      
+         1        NOP                                                      
+         2        NOP                                                      
+         3        NOP                                                      
+         4        NOP                                                      
+         5        DECLARE_CONST                                            'A', 2
+   4     6      > RETURN                                                   1
+```
+(`NOP` instructions are skipped during execution - plus later optimisation passes remove them anyway.)
+
+We can see that the bitwise NOT, string cast, and `define` function call have all been optimised away and replaced with a simple `DECLARE_CONST` op instruction.
+
+Interestingly, user-defined constants will not be apart of the first pass unless we combine it with pass 15 (which in itself is not a separate pass, just an addition to this pass).
+
+For example, using a constant, `B`, instead of the value `1`:
+```php
+const B = 1;
+define('A', strlen((string) ~B));
+```
+
+Will yield:
+```
+line     #* E I O op                           fetch          ext  return  operands
+-------------------------------------------------------------------------------------
+   2     0  E >   DECLARE_CONST                                            'B', 1
+   3     1        INIT_FCALL                                               'define'
+         2        SEND_VAL                                                 'A'
+         3        FETCH_CONSTANT                                   ~0      'B'
+         4        BW_NOT                                           ~1      ~0
+         5        CAST                                          6  ~2      ~1
+         6        STRLEN                                           ~3      ~2
+         7        SEND_VAL                                                 ~3
+         8        DO_ICALL                                                 
+   4     9      > RETURN                                                   1
+```
+
+We must set the optimisation level to `16385` (`(1 << 0) | (1 << 14)`) to make the first pass collect the constants it encounters, and then to subsequently replace them by their respective values. Doing so will yield:
+```
+line     #* E I O op                           fetch          ext  return  operands
+-------------------------------------------------------------------------------------
+   2     0  E >   DECLARE_CONST                                            'B', 1
+   3     1        NOP                                                      
+         2        NOP                                                      
+         3        NOP                                                      
+         4        NOP                                                      
+         5        NOP                                                      
+         6        NOP                                                      
+         7        NOP                                                      
+         8        DECLARE_CONST                                            'A', 2
+   4     9      > RETURN                                                   1
+```
+
+### Optimisation Pass 2
+
+`opcache.optimization_level=2`
+
+At this level, the following operations will be optimised if they have constant or literal operands or arguments:
+ - expression coercion to the correct type
+ - conditional elimination (`if` statements, for example)
+
+For example, the following:
+```php
+const N = 1;
+$a = '';
+if (PHP_VERSION === '7.1.1') {
+    $a .= N;
+}
+```
+
+Without optimisation will yield:
+```
+line     #* E I O op                           fetch          ext  return  operands
+-------------------------------------------------------------------------------------
+   3     0  E >   DECLARE_CONST                                            'N', 1
+   4     1        ASSIGN                                                   !0, ''
+   5     2      > JMPZ                                                     <true>, ->5
+   6     3    >   FETCH_CONSTANT                                   ~2      'N'
+         4        ASSIGN_CONCAT                                 0          !0, ~2
+   8     5    > > RETURN                                                   1
+```
+
+After setting the optimisation level to `2`, we get:
+```
+line     #* E I O op                           fetch          ext  return  operands
+-------------------------------------------------------------------------------------
+   3     0  E >   DECLARE_CONST                                            'N', 1
+   4     1        ASSIGN                                                   !0, ''
+   5     2        NOP                                                      
+   6     3        FETCH_CONSTANT                                   ~2      'N'
+         4        ASSIGN_CONCAT                                 0          !0, ~2
+   8     5      > RETURN                                                   1
+```
+
+The IF statement has been optimised out, though we still have to fetch the constant and perform the concat operation. We need the first and fifteenth optimisation passes in order to replace the constant with its value, so that the second optimisation pass can fold the constant operation.
+
+Setting the optimisation level to `16387` yields:
+```
+line     #* E I O op                           fetch          ext  return  operands
+-------------------------------------------------------------------------------------
+   3     0  E >   DECLARE_CONST                                            'N', 1
+   4     1        ASSIGN                                                   !0, ''
+   5     2        NOP                                                      
+   6     3        NOP                                                      
+         4        ASSIGN_CONCAT                                 0          !0, '1'
+   8     5      > RETURN                                                   1
+```
+
+Note also that the `ASSIGN_CONCAT` operation now has the following operands: the variable `$a`, and the coerced integer to string value `1`.
+
+### Optimisation Pass 3
+
+`opcache.optimization_level=4`
+
+At this level, the following operations will be optimised:
+ - self-assigning expressions will be turned into their compound assignment forms (e.g. `$i = $i + 1` => `$i += 1`)
+ - post-incrementation is converted to pre-incrementation where possible
+ - jmp-based optimisations...
+
+The following code:
+```php
+$i = 0;
+$i = $i + 1;
+$i++;
+```
+
+Unoptimised output:
+```
+line     #* E I O op                           fetch          ext  return  operands
+-------------------------------------------------------------------------------------
+   3     0  E >   ASSIGN                                                   !0, 0
+   4     1        ADD                                              ~2      !0, 1
+         2        ASSIGN                                                   !0, ~2
+   5     3        POST_INC                                         ~4      !0
+         4        FREE                                                     ~4
+   6     5      > RETURN                                                   1
+```
+
+Optimised output:
+```
+line     #* E I O op                           fetch          ext  return  operands
+-------------------------------------------------------------------------------------
+   3     0  E >   ASSIGN                                                   !0, 0
+   4     1        ASSIGN_ADD                                    0          !0, 1
+         2        NOP                                                      
+   5     3        PRE_INC                                                  !0
+         4        NOP                                                      
+   6     5      > RETURN                                                   1
+```
+
+So we can see that we've reduced the number of opcodes by a third (read: 2). This is because the compound assignment operation has compacted the `ADD` and `ASSIGN` opcodes into `ASSIGN_ADD`, and the pre-incrementation operation only requires one opcode, unlike post-incrementation (which requires 2). ...
+
+### Optimisation Pass 4
+
+`opcache.optimization_level=8`
+
+At this level, the following operations will be optimised:
+ - optimise function calls...
+
+... no opcodes removed at this level, only changed...
+
+### Optimisation Pass 5
+
+`opcache.optimization_level=16`
+
+This level begins by performing a block pass, which simply removes the `NOP` opcodes inserted by previous optimisations.
+
+A [control flow graph](https://en.wikipedia.org/wiki/Control_flow_graph) is then generated from the opcodes. This
+
+This means the following operations will be optimised:
+ - ...

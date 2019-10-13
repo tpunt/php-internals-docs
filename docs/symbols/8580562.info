@@ -1,0 +1,37 @@
+[[[id]]]
+8580562
+
+[[[name]]]
+GC_INFO
+
+[[[url]]]
+gc_info
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define GC_INFO(p) (p)->gc.u.v.gc_info
+
+[[[parameters]]]
+p
+A pointer to a structure to access its garbage information
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/272a9f29f5cba3050132e68f7303820743982822/Zend/zend_types.h#L440
+
+[[[description]]]
+An accessor macro for retrieving and storing further information for the GC, specifically for its [cycle detector](https://phpinternals.net/categories/garbage_collector#the-mark-and-sweep-(cycle)-collector). This information includes the root number and what 'colour' the root is (used for the [mark-and-sweep cycle detection](https://phpinternals.net/categories/garbage_collector#the-mark-and-sweep-algorithm) algorithm).
+
+This macro is used on any type that holds [garbage collection](https://phpinternals.net/categories/garbage_collector) information directly, such as the [`zend_string`](https://phpinternals.net/docs/zend_string), [`HashTable`](https://phpinternals.net/docs/hashtable), and [`zend_refcounted`](https://phpinternals.net/docs/zend_refcounted) types.
+
+[[[additional_information]]]
+For example:
+```c
+void setBlack(zend_refcounted *ref)
+{
+    GC_INFO_SET_COLOR(GC_INFO(ref), GC_BLACK);
+}
+```

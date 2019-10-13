@@ -1,0 +1,60 @@
+[[[id]]]
+42910342
+
+[[[name]]]
+zend_stack_apply_with_argument
+
+[[[url]]]
+zend_stack_apply_with_argument
+
+[[[type]]]
+function
+
+[[[declaration]]]
+ZEND_API void zend_stack_apply_with_argument(zend_stack *stack, int type, int (*apply_function)(void *element, void *arg), void *arg);
+
+[[[parameters]]]
+stack
+The stack being manipulated
+
+type
+The order (top to bottom or bottom to top) in which to apply the function to the stack's elements
+
+apply_function
+The function being applied to each element. It should return the usual [result codes](https://phpinternals.net/docs/zend_result_code)
+
+arg
+The argument to be passed to the callback
+
+[[[definition]]]
+ZEND_API void zend_stack_apply_with_argument(zend_stack *stack, int type, int (*apply_function)(void *element, void *arg), void *arg)
+{
+	int i;
+
+	switch (type) {
+		case ZEND_STACK_APPLY_TOPDOWN:
+			for (i=stack->top-1; i>=0; i--) {
+				if (apply_function(ZEND_STACK_ELEMENT(stack, i), arg)) {
+					break;
+				}
+			}
+			break;
+		case ZEND_STACK_APPLY_BOTTOMUP:
+			for (i=0; i<stack->top; i++) {
+				if (apply_function(ZEND_STACK_ELEMENT(stack, i), arg)) {
+					break;
+				}
+			}
+			break;
+	}
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/ec2823fb8c090c0d71f231c18a609d28b5b7b240/Zend/zend_stack.c#L128
+
+[[[description]]]
+Applies a given callback function with an argument to each element in the stack, either from top to bottom (`ZEND_STACK_APPLY_TOPDOWN`) or from bottom to top (`ZEND_STACK_APPLY_BOTTOMUP`).
+
+See also [zend_stack_apply](https://phpinternals.net/docs/zend_stack_apply) to apply a given function to each element without passing an additional argument.
+
+[[[additional_information]]]

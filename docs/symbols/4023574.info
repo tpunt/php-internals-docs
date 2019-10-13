@@ -1,0 +1,36 @@
+[[[id]]]
+4023574
+
+[[[name]]]
+ZVAL_LONG
+
+[[[url]]]
+zval_long
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZVAL_LONG(z, l)
+
+[[[parameters]]]
+z
+The zval to set the long value of
+
+l
+The long value being set
+
+[[[definition]]]
+#define ZVAL_LONG(z, l) {				\
+		zval *__z = (z);				\
+		Z_LVAL_P(__z) = l;				\
+		Z_TYPE_INFO_P(__z) = IS_LONG;	\
+	}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/9dada7b291d3fb88a81406cafa5d6fbcb1ee11f0/Zend/zend_types.h#L674
+
+[[[description]]]
+Sets the long value of a zval (see the [`IS_LONG`](http://phpinternals.net/docs/is_long) type).
+
+[[[additional_information]]]

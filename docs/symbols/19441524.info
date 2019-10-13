@@ -1,0 +1,35 @@
+[[[id]]]
+19441524
+
+[[[name]]]
+ZVAL_BOOL
+
+[[[url]]]
+zval_bool
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZVAL_BOOL(z, b)
+
+[[[parameters]]]
+z
+The zval to set the boolean value of
+
+b
+The boolean value being set
+
+[[[definition]]]
+#define ZVAL_BOOL(z, b) do {			\
+		Z_TYPE_INFO_P(z) =				\
+			(b) ? IS_TRUE : IS_FALSE;	\
+	} while (0)
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/c8efaea1e3f93b5b836a38c6985b67983b1dc95a/Zend/zend_types.h#L669
+
+[[[description]]]
+Sets the boolean value of a [zval](http://phpinternals.net/docs/zval) (see the [`IS_TRUE`](http://phpinternals.net/docs/is_true) and [`IS_FALSE`](http://phpinternals.net/docs/is_false) types).
+
+[[[additional_information]]]

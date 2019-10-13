@@ -1,0 +1,82 @@
+[[[id]]]
+9846430
+
+[[[name]]]
+Z_PARAM_OBJECT
+
+[[[url]]]
+z_param_object
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define Z_PARAM_OBJECT(dest) Z_PARAM_OBJECT_EX(dest, 0, 0)
+
+[[[parameters]]]
+dest
+A [`zval *`](https://phpinternals.net/docs/zval) to store the parameter in
+
+[[[definition]]]
+/* Declaration of Z_PARAM_OBJECT_EX */
+#define Z_PARAM_OBJECT_EX(dest, check_null, separate) \
+	Z_PARAM_OBJECT_EX2(dest, check_null, separate, separate)
+
+/* Declaration of Z_PARAM_OBJECT_EX2 */
+#define Z_PARAM_OBJECT_EX2(dest, check_null, deref, separate) \
+		Z_PARAM_PROLOGUE(deref, separate); \
+		if (UNEXPECTED(!zend_parse_arg_object(_arg, &dest, NULL, check_null))) { \
+			_expected_type = Z_EXPECTED_OBJECT; \
+			error_code = ZPP_ERROR_WRONG_ARG; \
+			break; \
+		}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/86bd6ab72c0f32979551ea44d30a9fe7ed3c99ad/Zend/zend_API.h#L976
+
+[[[description]]]
+Specify a parameter that should parsed as an object into a [`zval`](https://phpinternals.net/docs/zval).
+
+[[[additional_information]]]
+For example, let's create a function called `is_countable` that checks to see if an object is countable (i.e. implements the `Countable` interface):
+```c
+/* Argument information */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_is_countable, 0, 0, 1)
+	ZEND_ARG_INFO(0, obj)
+ZEND_END_ARG_INFO()
+
+/* bool is_countable(object $obj) */
+PHP_FUNCTION(is_countable)
+{
+	zval *obj;
+
+	// new API
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT(obj)
+	ZEND_PARSE_PARAMETERS_END();
+
+	/* old API
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &obj) != SUCCESS) {
+	    return;
+	}
+	*/
+
+	RETVAL_BOOL(instanceof_function(Z_OBJCE_P(obj), zend_ce_countable));
+}
+```
+
+Usage:
+```php
+$obj1 = new StdClass();
+$obj2 = new class implements Countable {
+    public function count(){}
+};
+
+var_dump(is_countable($obj1), is_countable($obj2));
+```
+
+Output:
+```
+bool(false)
+bool(true)
+```

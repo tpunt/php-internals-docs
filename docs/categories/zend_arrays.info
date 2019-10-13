@@ -1,0 +1,33 @@
+[[[name]]]
+Zend Arrays
+
+[[[url]]]
+zend_arrays
+
+[[[subcategories]]]
+
+[[[supercategories]]]
+
+[[[articles]]]
+
+[[[symbols]]]
+92431168
+49831234
+7647381
+27223581
+49228232
+4100218
+32208715
+65920513
+23239776
+8924116
+51668684
+38271445
+43301773
+
+[[[body]]]
+Zend arrays are ordered hash tables, and they can come in two forms (internally):
+ - **immutable** - This is an optimisation technique that only occurs under specific situations (see [`IS_ARRAY_IMMUTABLE`](https://phpinternals.net/docs/is_array_immutable)).
+ - **mutable** - This is for when the immutable arrays optimisation cannot be applied (the most common scenario).
+
+Mutable arrays are reference counted (see [`IS_TYPE_REFCOUNTED`](https://phpinternals.net/docs/is_type_refcounted)), collectable (see [`GC_COLLECTABLE`](https://phpinternals.net/docs/gc_collectable)), and copyable (see [`IS_TYPE_COPYABLE`](https://phpinternals.net/docs/is_type_copyable)). Immutable arrays have none of these properties.

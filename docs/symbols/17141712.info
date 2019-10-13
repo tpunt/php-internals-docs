@@ -1,0 +1,39 @@
+[[[id]]]
+17141712
+
+[[[name]]]
+zend_stack_init
+
+[[[url]]]
+zend_stack_init
+
+[[[type]]]
+function
+
+[[[declaration]]]
+ZEND_API int zend_stack_init(zend_stack *stack, int size);
+
+[[[parameters]]]
+stack
+The stack to initialise
+
+size
+The size of the elements being stored
+
+[[[definition]]]
+ZEND_API int zend_stack_init(zend_stack *stack, int size)
+{
+	stack->size = size;
+	stack->top = 0;
+	stack->max = 0;
+	stack->elements = NULL;
+	return SUCCESS;
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/ec2823fb8c090c0d71f231c18a609d28b5b7b240/Zend/zend_stack.c#L27
+
+[[[description]]]
+Simply initialises a new stack.
+
+[[[additional_information]]]

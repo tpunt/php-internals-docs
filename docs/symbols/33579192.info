@@ -1,0 +1,42 @@
+[[[id]]]
+33579192
+
+[[[name]]]
+zend_string_init
+
+[[[url]]]
+zend_string_init
+
+[[[type]]]
+function
+
+[[[declaration]]]
+static zend_always_inline zend_string *zend_string_init(const char *str, size_t len, int persistent);
+
+[[[parameters]]]
+str
+The string to store a copy of.
+
+len
+The length of the string to store a copy of.
+
+persistent
+Whether to store it past the end of the request (see the [Persistence](http://phpinternals.net/categories/zend_strings) section of the [Zend Strings](http://phpinternals.net/categories/zend_strings) category)
+
+[[[definition]]]
+static zend_always_inline zend_string *zend_string_init(const char *str, size_t len, int persistent)
+{
+	zend_string *ret = zend_string_alloc(len, persistent);
+
+	memcpy(ZSTR_VAL(ret), str, len);
+	ZSTR_VAL(ret)[len] = '\0';
+	return ret;
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/eb6614e4583343b9ae4cad13da815404c18cb943/Zend/zend_string.h#L168
+
+[[[description]]]
+Makes a new hard copy of a string.
+
+[[[additional_information]]]

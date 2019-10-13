@@ -1,0 +1,26 @@
+[[[id]]]
+27895741
+
+[[[name]]]
+IS_OBJ_APPLY_COUNT
+
+[[[url]]]
+is_obj_apply_count
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define IS_OBJ_APPLY_COUNT 0x07
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/840b77c02e23d3be8fdafc87ba192b1ab211245e/Zend/zend_types.h#L503
+
+[[[description]]]
+This is a mask that is applied to the GC flag information of an object to retrieve the stored count (this retrieval should be done via the [`Z_OBJ_APPLY_COUNT`](https://phpinternals.net/docs/z_obj_apply_count) macro). This count is used for recursively traversing an object (such as when printing it out). For each new level that is traversed (the property table of an object), the value is incremented by one (with the [`Z_OBJ_INC_APPLY_COUNT`](https://phpinternals.net/docs/z_obj_inc_apply_count) macro). This is used to prevent infinite recursion on self-referencing objects.
+
+[[[additional_information]]]

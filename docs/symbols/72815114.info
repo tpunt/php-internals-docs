@@ -1,0 +1,29 @@
+[[[id]]]
+72815114
+
+[[[name]]]
+Z_OBJCE
+
+[[[url]]]
+z_objce
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define Z_OBJCE(zval) (Z_OBJ(zval)->ce)
+
+[[[parameters]]]
+zval
+The [`zval`](https://phpinternals.net/docs/zval) to fetch the class entry of the object value
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/86bd6ab72c0f32979551ea44d30a9fe7ed3c99ad/Zend/zend_types.h#L608
+
+[[[description]]]
+Fetches the class entry of the object value from the given [`zval`](https://phpinternals.net/docs/zval) (see the [`IS_OBJECT`](https://phpinternals.net/docs/is_object) type).
+
+[[[additional_information]]]
+This macro also has a counterpart macro, `Z_OBJCE_P`, that accepts a pointer to a zval instead.

@@ -1,0 +1,37 @@
+[[[id]]]
+44609595
+
+[[[name]]]
+zend_arena_create
+
+[[[url]]]
+zend_arena_create
+
+[[[type]]]
+function
+
+[[[declaration]]]
+static zend_always_inline zend_arena* zend_arena_create(size_t size);
+
+[[[parameters]]]
+size
+The size of the arena to allocate
+
+[[[definition]]]
+static zend_always_inline zend_arena* zend_arena_create(size_t size)
+{
+	zend_arena *arena = (zend_arena*)emalloc(size);
+
+	arena->ptr = (char*) arena + ZEND_MM_ALIGNED_SIZE(sizeof(zend_arena));
+	arena->end = (char*) arena + size;
+	arena->prev = NULL;
+	return arena;
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/c18ba686cdf2d937475eb3d5c239e4ef8e733fa6/Zend/zend_arena.h#L34
+
+[[[description]]]
+Allocates memory for a new [`zend_arena`](http://phpinternals.net/docs/zend_arena) of a given size.
+
+[[[additional_information]]]

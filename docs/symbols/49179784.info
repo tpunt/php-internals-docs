@@ -1,0 +1,26 @@
+[[[id]]]
+49179784
+
+[[[name]]]
+IS_OBJ_HAS_GUARDS
+
+[[[url]]]
+is_obj_has_guards
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define IS_OBJ_HAS_GUARDS (1<<6)
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/bc5811f361ead53a803046b128a64d15aba2f2e5/Zend/zend_types.h#L507
+
+[[[description]]]
+This object flag is used to denote that guards have been set for an object. This ensures that when the object has been destroyed, the allocated guards are also released to prevent memory leaks.
+
+[[[additional_information]]]

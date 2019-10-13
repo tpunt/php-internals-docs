@@ -1,0 +1,50 @@
+[[[id]]]
+86981135
+
+[[[name]]]
+Z_PARAM_ARRAY_OR_OBJECT_HT
+
+[[[url]]]
+z_param_array_or_object_ht
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define Z_PARAM_ARRAY_OR_OBJECT_HT(dest) Z_PARAM_ARRAY_OR_OBJECT_HT_EX(dest, 0, 0)
+
+[[[parameters]]]
+dest
+A [HashTable *](https://phpinternals.net/docs/hashtable) to store the parameter in
+
+[[[definition]]]
+/* Definition of Z_PARAM_ARRAY_OR_OBJECT_HT_EX */
+#define Z_PARAM_ARRAY_OR_OBJECT_HT_EX(dest, check_null, separate) \
+	Z_PARAM_ARRAY_OR_OBJECT_HT_EX2(dest, check_null, separate, separate)
+
+/* Definition of Z_PARAM_ARRAY_OR_OBJECT_HT_EX2 */
+#define Z_PARAM_ARRAY_OR_OBJECT_HT_EX2(dest, check_null, deref, separate) \
+		Z_PARAM_PROLOGUE(deref, separate); \
+		if (UNEXPECTED(!zend_parse_arg_array_ht(_arg, &dest, check_null, 1, separate))) { \
+			_expected_type = Z_EXPECTED_ARRAY; \
+			error_code = ZPP_ERROR_WRONG_ARG; \
+			break; \
+		}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/3395e63d550e8b5237d13f70fc0a097a7ef17049/Zend/zend_API.h#L931
+
+[[[description]]]
+Specify a parameter that should parsed as either an array or an object into a [`HashTable`](https://phpinternals.net/docs/hashtable). If the argument is an object, then the object's property table will be used. This can be seen in, for example, the [`password_hash`](http://php.net/password_hash) function:
+```php
+// array for $options
+$options = ['cost' => 12];
+password_hash('...', PASSWORD_BCRYPT, $options);
+
+// object for $options
+$options = new StdClass;
+$options->cost = 12; 
+password_hash('...', PASSWORD_BCRYPT, $options);
+```
+
+[[[additional_information]]]

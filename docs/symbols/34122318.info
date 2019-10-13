@@ -1,0 +1,46 @@
+[[[id]]]
+34122318
+
+[[[name]]]
+ZVAL_DUP
+
+[[[url]]]
+zval_dup
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZVAL_DUP(z, v)
+
+[[[parameters]]]
+z
+A pointer to the new zval to store a copy of the old zval in
+
+v
+A pointer to the old zval being copied
+
+[[[definition]]]
+#define ZVAL_DUP(z, v)									\
+	do {												\
+		zval *_z1 = (z);								\
+		const zval *_z2 = (v);							\
+		zend_refcounted *_gc = Z_COUNTED_P(_z2);		\
+		uint32_t _t = Z_TYPE_INFO_P(_z2);				\
+		ZVAL_COPY_VALUE_EX(_z1, _z2, _gc, _t);			\
+		if ((_t & ((IS_TYPE_REFCOUNTED|IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT)) != 0) { \
+			if ((_t & (IS_TYPE_COPYABLE << Z_TYPE_FLAGS_SHIFT)) != 0) { \
+				_zval_copy_ctor_func(_z1 ZEND_FILE_LINE_CC); \
+			} else {									\
+				GC_REFCOUNT(_gc)++;						\
+			}											\
+		}												\
+	} while (0)
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/fdfc5c1b3dbc9c8030ff8019ef9bf66d9f46d2d8/Zend/zend_types.h#L939
+
+[[[description]]]
+This macro performs a hard copy of the old zval. Only copyable zvals (see [`IS_TYPE_COPYABLE `](http://phpinternals.net/docs/is_type_copyable)) will actually be copied. Uncopyable, but refcounted zvals will have their reference count incremented by one.
+
+[[[additional_information]]]

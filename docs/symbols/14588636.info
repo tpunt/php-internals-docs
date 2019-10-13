@@ -1,0 +1,32 @@
+[[[id]]]
+14588636
+
+[[[name]]]
+zval_get_type
+
+[[[url]]]
+zval_get_type
+
+[[[type]]]
+function
+
+[[[declaration]]]
+static zend_always_inline zend_uchar zval_get_type(const zval* pz);
+
+[[[parameters]]]
+pz
+The zval to get the type of
+
+[[[definition]]]
+static zend_always_inline zend_uchar zval_get_type(const zval* pz)
+{
+	return pz->u1.v.type;
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/fdfc5c1b3dbc9c8030ff8019ef9bf66d9f46d2d8/Zend/zend_types.h#L389
+
+[[[description]]]
+This function is used by the [`Z_TYPE`](http://phpinternals.net/docs/z_type) macro to fetch the type of a zval in a read-only way. The `Z_TYPE` should be used instead of this function. If the type of a zval needs to be set, then the [`Z_TYPE_INFO`](http://phpinternals.net/docs/z_type_info) macro should be used instead.
+
+[[[additional_information]]]

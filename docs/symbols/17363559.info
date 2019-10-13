@@ -1,0 +1,48 @@
+[[[id]]]
+17363559
+
+[[[name]]]
+ZEND_BOOL_XOR
+
+[[[url]]]
+zend_bool_xor
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZEND_BOOL_XOR 14
+
+[[[parameters]]]
+
+[[[definition]]]
+ZEND_VM_HANDLER(14, ZEND_BOOL_XOR, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op2;
+	zval *op1, *op2;
+
+	SAVE_OPLINE();
+	op1 = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	boolean_xor_function(EX_VAR(opline->result.var), op1, op2);
+	FREE_OP1();
+	FREE_OP2();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/31e4afe3c3654f9c5ab2eafa3a02c62d41c58b47/Zend/zend_vm_def.h#L717
+
+[[[description]]]
+This opcode is used for the boolean XOR operator.
+
+Quick overview:
+ - `op1` - left operand
+ - `op2` - right operand
+ - `result` - boolean XORed result
+ - `extended_value` - unused
+ - `op1_type` - CONST|TMPVAR|CV
+ - `op2_type` - CONST|TMPVAR|CV
+
+[[[additional_information]]]

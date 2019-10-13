@@ -1,0 +1,33 @@
+[[[id]]]
+46218913
+
+[[[name]]]
+HASH_OF
+
+[[[url]]]
+hash_of
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define HASH_OF(p)
+
+[[[parameters]]]
+p
+The [`zval *`](https://phpinternals.net/docs/zval) to fetch the [`HashTable *`](https://phpinternals.net/docs/hashtable) of
+
+[[[definition]]]
+#define HASH_OF(p) \
+    (Z_TYPE_P(p) == IS_ARRAY ? Z_ARRVAL_P(p) : \
+        ((Z_TYPE_P(p) == IS_OBJECT ? Z_OBJ_HT_P(p)->get_properties((p)) : NULL)))
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/9c2a1f52a5f087c70a9e91dc1f43e5718d1bd8b6/Zend/zend_API.h#L669
+
+[[[description]]]
+Fetches a [`HashTable`](https://phpinternals.net/docs/hashtable) from either an array (returning its value) or from an object (returning its property table). Any other `zval` type will result in a `NULL` return.
+
+This is used because it is common to treat objects as associative arrays. This macro is therefore usually used if the zval is known to be either an array or an object, where the hash table of values needs to be searched through (e.g. to retrieve the value of a setting).
+
+[[[additional_information]]]

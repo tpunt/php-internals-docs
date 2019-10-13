@@ -1,0 +1,30 @@
+[[[id]]]
+60583175
+
+[[[name]]]
+GC_REFCOUNT
+
+[[[url]]]
+gc_refcount
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define GC_REFCOUNT(p) (p)->gc.refcount
+
+[[[parameters]]]
+p
+A pointer to a structure to access its reference count
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/9dada7b291d3fb88a81406cafa5d6fbcb1ee11f0/Zend/zend_types.h#L437
+
+[[[description]]]
+Accesses (either for setting or retrieval) the reference count of a type.
+
+It must only be used on reference-counted types, such as [`zend_string`](https://phpinternals.net/docs/zend_string) and [`HashTable`](https://phpinternals.net/docs/hashtable).
+
+[[[additional_information]]]

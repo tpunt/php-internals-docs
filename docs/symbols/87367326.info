@@ -1,0 +1,41 @@
+[[[id]]]
+87367326
+
+[[[name]]]
+zend_execute_data
+
+[[[url]]]
+zend_execute_data
+
+[[[type]]]
+type
+
+[[[declaration]]]
+typedef struct _zend_execute_data zend_execute_data;
+
+[[[parameters]]]
+
+[[[definition]]]
+struct _zend_execute_data {
+	const zend_op       *opline;
+	zend_execute_data   *call;
+	zval                *return_value;
+	zend_function       *func;
+	zval                 This;
+	zend_execute_data   *prev_execute_data;
+	zend_array          *symbol_table;
+#if ZEND_EX_USE_RUN_TIME_CACHE
+	void               **run_time_cache;   /* cache op_array->run_time_cache */
+#endif
+#if ZEND_EX_USE_LITERALS
+	zval                *literals;         /* cache op_array->literals       */
+#endif
+};
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/29ab1dc95a9c53c02bc9e6fc75d398f9e8a7be27/Zend/zend_compile.h#L462
+
+[[[description]]]
+Stores information on the current execution environment. This is accessed via the [`EX`](https://phpinternals.net/docs/ex) macro, and is available in all [`ZEND_FUNCTION`](https://phpinternals.net/docs/zend_function) and [`ZEND_METHOD`](https://phpinternals.net/docs/zend_method) definitions.
+
+[[[additional_information]]]

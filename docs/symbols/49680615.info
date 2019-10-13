@@ -1,0 +1,61 @@
+[[[id]]]
+49680615
+
+[[[name]]]
+zend_object_std_dtor
+
+[[[url]]]
+zend_object_std_dtor
+
+[[[type]]]
+function
+
+[[[declaration]]]
+ZEND_API void zend_object_std_dtor(zend_object *object)
+
+[[[parameters]]]
+object
+The `zend_object` to be destroyed
+
+[[[definition]]]
+ZEND_API void zend_object_std_dtor(zend_object *object)
+{
+	zval *p, *end;
+
+	if (object->properties) {
+		if (EXPECTED(!(GC_FLAGS(object->properties) & IS_ARRAY_IMMUTABLE))) {
+			if (EXPECTED(--GC_REFCOUNT(object->properties) == 0)) {
+				zend_array_destroy(object->properties);
+			}
+		}
+	}
+	p = object->properties_table;
+	if (EXPECTED(object->ce->default_properties_count)) {
+		end = p + object->ce->default_properties_count;
+		do {
+			i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
+			p++;
+		} while (p != end);
+	}
+	if (UNEXPECTED(GC_FLAGS(object) & IS_OBJ_HAS_GUARDS)) {
+		if (EXPECTED(Z_TYPE_P(p) == IS_STRING)) {
+			zend_string_release(Z_STR_P(p));
+		} else {
+			HashTable *guards;
+
+			ZEND_ASSERT(Z_TYPE_P(p) == IS_ARRAY);
+			guards = Z_ARRVAL_P(p);
+			ZEND_ASSERT(guards != NULL);
+			zend_hash_destroy(guards);
+			FREE_HASHTABLE(guards);
+		}
+	}
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/39459114ff4ab7c037d3e457da4a3c04128ea860/Zend/zend_objects.c#L43
+
+[[[description]]]
+Destroys a `zend_obect` by releasing its properties table, and any guards that are associated with the object. It is also the default handler for the [`free_obj`](https://phpinternals.net/categories/zend_objects#free_obj) object handler.
+
+[[[additional_information]]]

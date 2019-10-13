@@ -1,0 +1,36 @@
+[[[id]]]
+77808848
+
+[[[name]]]
+emalloc
+
+[[[url]]]
+emalloc
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define emalloc(size) _emalloc((size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+
+[[[parameters]]]
+size
+The amount of memory (in bytes) to allocate
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/bb217f781a34a06bf682885b5f8e000a319d01a0/Zend/zend_alloc.h#L159
+
+[[[description]]]
+Allocates the requested amount of bytes as [non-persistent memory](https://phpinternals.net/categories/zend_memory_manager#persistent-vs-non-persistent-allocations) by the [ZMM](https://phpinternals.net/categories/zend_memory_manager).
+
+[[[additional_information]]]
+For example:
+```c
+zval *z = emalloc(sizeof(zval));
+
+// ...
+
+efree(z);
+```

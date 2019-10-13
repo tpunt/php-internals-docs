@@ -1,0 +1,28 @@
+[[[id]]]
+71823373
+
+[[[name]]]
+RETURN_STR
+
+[[[url]]]
+return_str
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define RETURN_STR(s) 					{ RETVAL_STR(s); return; }
+
+[[[parameters]]]
+s
+The [`zend_string`](https://phpinternals.net/docs/zend_string) value being set to the `return_value` zval
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/a2e83346134c7a197492cb520ad440e0e1aff463/Zend/zend_API.h#L631
+
+[[[description]]]
+Sets the return value to the specified [`zend_string`](https://phpinternals.net/docs/zend_string) value, and then make an empty return from the function.
+
+[[[additional_information]]]

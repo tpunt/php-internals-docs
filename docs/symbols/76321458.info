@@ -1,0 +1,26 @@
+[[[id]]]
+76321458
+
+[[[name]]]
+ZEND_FETCH_CLASS_AUTO
+
+[[[url]]]
+zend_fetch_class_auto
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZEND_FETCH_CLASS_AUTO 4
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/ad25d67d733ae956145b5001184f25888b24eacb/Zend/zend_compile.h#L842
+
+[[[description]]]
+This [Zend Class](https://phpinternals.net/categories/zend_classes) fetching type is used in places where either a class name or one of the scope resolution operator's keywords (`self`, `parent`, `static`) can be used. For example, this is used when fetching the class entry of a typed parameter (since a class name or one of the aforementioned keywords is a valid type). For places where the keywords are not allowed to be used, such as when performing a dynamic method call with a string class name, the `ZEND_FETCH_CLASS_DEFAULT` class fetching type will be used.
+
+[[[additional_information]]]

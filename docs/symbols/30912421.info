@@ -1,0 +1,29 @@
+[[[id]]]
+30912421
+
+[[[name]]]
+Z_ISNULL
+
+[[[url]]]
+z_isnull
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define Z_ISNULL(zval) (Z_TYPE(zval) == IS_NULL)
+
+[[[parameters]]]
+zval
+The zval to check
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/9dada7b291d3fb88a81406cafa5d6fbcb1ee11f0/Zend/zend_types.h#L566
+
+[[[description]]]
+Checks whether the given [zval](https://phpinternals.net/docs/zval) has a `null` value (see this [`IS_NULL`](https://phpinternals.net/docs/is_null) type).
+
+[[[additional_information]]]
+This macro also has a counterpart macro, `Z_ISNULL_P`, that accepts a pointer to a zval instead.

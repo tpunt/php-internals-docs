@@ -1,0 +1,28 @@
+[[[id]]]
+53241260
+
+[[[name]]]
+IS_STR_PERMANENT
+
+[[[url]]]
+is_str_permanent
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define IS_STR_PERMANENT (1<<2)
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/9dada7b291d3fb88a81406cafa5d6fbcb1ee11f0/Zend/zend_types.h#L494
+
+[[[description]]]
+This [garbage collector](https://phpinternals.net/categories/garbage_collector) flag is used specifically for strings to denote a permanent string.
+
+Permanent strings are seldom used. Their usage is similar to persistent strings (see [`IS_STR_PERSISTENT`](https://phpinternals.net/docs/is_str_persistent)), except that they can be allocated in one request, and continue to live past the end of that request and onto subsequent requests. One of their usages is in caching compiled regular expressions in the PCRE extension.
+
+[[[additional_information]]]

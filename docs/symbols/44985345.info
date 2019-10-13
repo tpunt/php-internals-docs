@@ -1,0 +1,35 @@
+[[[id]]]
+44985345
+
+[[[name]]]
+Z_TRY_DELREF
+
+[[[url]]]
+z_try_delref
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define Z_TRY_DELREF(z) Z_TRY_DELREF_P(&(z))
+
+[[[parameters]]]
+z
+The zval to try to delete a reference from
+
+[[[definition]]]
+/* Definition for the underlying Z_TRY_DELREF_P macro */
+#define Z_TRY_DELREF_P(pz) do {		\
+	if (Z_REFCOUNTED_P((pz))) {		\
+		Z_DELREF_P((pz));			\
+	}								\
+} while (0)
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/40ecad34022b6e687cc654d47c88f8cef5d418fd/Zend/zend_types.h#L878
+
+[[[description]]]
+This macro attempts to decrement the reference count of the given zval. This will only occur if the zval is a reference counted type (see [`IS_TYPE_REFCOUNTED`](http://phpinternals.net/docs/is_type_refcounted) for further information on refcounted types). If it is known that the zval is refcounted, then the [`Z_DELREF`](http://phpinternals.net/docs/z_delref) macro can be used instead.
+
+[[[additional_information]]]
+This macro also has a counterpart macro, `Z_TRY_DELREF_P `, that accepts a pointer to a zval instead.

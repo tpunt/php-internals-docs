@@ -1,0 +1,48 @@
+[[[id]]]
+10856036
+
+[[[name]]]
+zend_string_equals
+
+[[[url]]]
+zend_string_equals
+
+[[[type]]]
+function
+
+[[[declaration]]]
+static zend_always_inline zend_bool zend_string_equals(zend_string *s1, zend_string *s2);
+
+[[[parameters]]]
+s1
+The [zend_string *](https://phpinternals.net/docs/zend_string) being compared to
+
+s2
+The [zend_string *](https://phpinternals.net/docs/zend_string) being compared
+
+[[[definition]]]
+static zend_always_inline zend_bool zend_string_equals(zend_string *s1, zend_string *s2)
+{
+	return s1 == s2 || (ZSTR_LEN(s1) == ZSTR_LEN(s2) && !memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), ZSTR_LEN(s1)));
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/dfe030097dd119c59ebba69c3ec692c2b6bbc13c/Zend/zend_string.h#L297
+
+[[[description]]]
+Performs a case-sensitive comparison between two [`zend_string`](https://phpinternals.net/docs/zend_string)s, returning whether they are exactly equal or not.
+
+See also [`zend_string_equals_ci`](https://phpinternals.net/docs/zend_string_equals_ci) to perform a case-insensitive comparison between two [`zend_string`](https://phpinternals.net/docs/zend_string)s.
+
+[[[additional_information]]]
+For example:
+```c
+zend_string *str1 = zend_string_init(ZEND_STRL("abc"), 0);
+zend_string *str2 = zend_string_init(ZEND_STRL("aBc"), 0);
+
+if (zend_string_equals(str1, str2)) { // false
+    // they're equal
+} else {
+    // they're different
+}
+```

@@ -1,0 +1,28 @@
+[[[id]]]
+11678213
+
+[[[name]]]
+GC_TYPE_INFO
+
+[[[url]]]
+gc_type_info
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define GC_TYPE_INFO(p) (p)->gc.u.type_info
+
+[[[parameters]]]
+p
+A pointer to a structure to access its garbage information
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/272a9f29f5cba3050132e68f7303820743982822/Zend/zend_types.h#L441
+
+[[[description]]]
+This macro is typically used for setting information for the garbage collector all at once. For finer-grained access, the [`GC_TYPE`](https://phpinternals.net/docs/gc_type), [`GC_FLAGS`](https://phpinternals.net/docs/gc_flags), or [`GC_INFO`](https://phpinternals.net/docs/gc_info) macros may be used.
+
+[[[additional_information]]]

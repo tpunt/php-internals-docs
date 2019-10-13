@@ -1,0 +1,101 @@
+[[[id]]]
+26707870
+
+[[[name]]]
+Z_PARAM_OBJECT_OF_CLASS
+
+[[[url]]]
+z_param_object_of_class
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define Z_PARAM_OBJECT_OF_CLASS(dest, _ce) Z_PARAM_OBJECT_OF_CLASS_EX(dest, _ce, 0, 0)
+
+[[[parameters]]]
+dest
+A [`zval *`](https://phpinternals.net/docs/zval) to store the parameter in
+
+_ce
+The `zend_class_entry *` to check the parameter against
+
+[[[definition]]]
+/* Definition of Z_PARAM_OBJECT_OF_CLASS_EX */
+#define Z_PARAM_OBJECT_OF_CLASS_EX(dest, _ce, check_null, separate) \
+	Z_PARAM_OBJECT_OF_CLASS_EX2(dest, _ce, check_null, separate, separate)
+
+/* Definition of Z_PARAM_OBJECT_OF_CLASS_EX2 */
+#define Z_PARAM_OBJECT_OF_CLASS_EX2(dest, _ce, check_null, deref, separate) \
+		Z_PARAM_PROLOGUE(deref, separate); \
+		if (UNEXPECTED(!zend_parse_arg_object(_arg, &dest, _ce, check_null))) { \
+			if (_ce) { \
+				_error = ZSTR_VAL((_ce)->name); \
+				error_code = ZPP_ERROR_WRONG_CLASS; \
+				break; \
+			} else { \
+				_expected_type = Z_EXPECTED_OBJECT; \
+				error_code = ZPP_ERROR_WRONG_ARG; \
+				break; \
+			} \
+		}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/e33259f3104188f1d02122fde2b0ccdcf8a16c2b/Zend/zend_API.h#L997
+
+[[[description]]]
+Specify a parameter that should parsed as an object into a `zval`, which has been validated to be of a certain class. This is basically a shorthand version of using [`Z_PARAM_OBJECT`](https://phpinternals.net/docs/z_param_object) and then applying the [`instanceof_function`](https://phpinternals.net/docs/instanceof_function) function on the object's class entry.
+
+[[[additional_information]]]
+For example, let's create a function called `exception_dump` that requires a `Throwable` as an argument, and then outputs some information about it:
+```c
+/* argument information */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_exception_dump, 0, 0, 1)
+	ZEND_ARG_INFO(0, arg)
+ZEND_END_ARG_INFO()
+
+/* void exception_dump(Throwable $arg) */
+PHP_FUNCTION(exception_dump)
+{
+	zval *arg;
+
+	// new API
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(arg, zend_ce_throwable)
+	ZEND_PARSE_PARAMETERS_END();
+
+	/* old API
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &arg, zend_ce_throwable) == FAILURE) {
+		return;
+	}
+	*/
+
+	php_debug_zval_dump(arg, -1);
+}
+```
+
+Usage:
+```php
+exception_formatter(new Exception());
+```
+
+Output:
+```
+object(Exception)#1 (7) refcount(1){
+ ["message":protected]=>
+string(0) "" refcount(1)
+ ["string":"Exception":private]=>
+string(0) "" refcount(1)
+ ["code":protected]=>
+int(0)
+ ["file":protected]=>
+string(17) "Command line code" refcount(1)
+ ["line":protected]=>
+int(1)
+ ["trace":"Exception":private]=>
+array(0) refcount(1){
+}
+ ["previous":"Exception":private]=>
+NULL
+}
+```

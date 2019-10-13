@@ -1,0 +1,56 @@
+[[[id]]]
+66541044
+
+[[[name]]]
+zend_arena_alloc
+
+[[[url]]]
+zend_arena_alloc
+
+[[[type]]]
+function
+
+[[[declaration]]]
+static zend_always_inline void* zend_arena_alloc(zend_arena **arena_ptr, size_t size);
+
+[[[parameters]]]
+arena_ptr
+The pointer to the arena pointer (this is used to update `arena_ptr`s value in the event of a new arena needing to be allocated)
+
+size
+The number of bytes needing to be allocated by this arena
+
+[[[definition]]]
+static zend_always_inline void* zend_arena_alloc(zend_arena **arena_ptr, size_t size)
+{
+	zend_arena *arena = *arena_ptr;
+	char *ptr = arena->ptr;
+
+	size = ZEND_MM_ALIGNED_SIZE(size);
+
+	if (EXPECTED(size <= (size_t)(arena->end - ptr))) {
+		arena->ptr = ptr + size;
+	} else {
+		size_t arena_size =
+			UNEXPECTED((size + ZEND_MM_ALIGNED_SIZE(sizeof(zend_arena))) > (size_t)(arena->end - (char*) arena)) ?
+				(size + ZEND_MM_ALIGNED_SIZE(sizeof(zend_arena))) :
+				(size_t)(arena->end - (char*) arena);
+		zend_arena *new_arena = (zend_arena*)emalloc(arena_size);
+
+		ptr = (char*) new_arena + ZEND_MM_ALIGNED_SIZE(sizeof(zend_arena));
+		new_arena->ptr = (char*) new_arena + ZEND_MM_ALIGNED_SIZE(sizeof(zend_arena)) + size;
+		new_arena->end = (char*) new_arena + arena_size;
+		new_arena->prev = arena;
+		*arena_ptr = new_arena;
+	}
+
+	return (void*) ptr;
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/c18ba686cdf2d937475eb3d5c239e4ef8e733fa6/Zend/zend_arena.h#L55
+
+[[[description]]]
+Advances the current memory pointer position (the `ptr` member of [`zend_arena`](http://phpinternals.net/docs/zend_arena)) in the given arena forward a given number of bytes. If there is not enough memory available (i.e. `end` - `ptr` < `size`), a new `zend_arena` structure is allocated and has its `ptr` member memory pointer advanced `size` bytes. The old arena is then linked to the new arena's `prev` member.
+
+[[[additional_information]]]

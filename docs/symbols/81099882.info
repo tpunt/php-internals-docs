@@ -1,0 +1,31 @@
+[[[id]]]
+81099882
+
+[[[name]]]
+ZVAL_UNDEF
+
+[[[url]]]
+zval_undef
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZVAL_UNDEF(z)
+
+[[[parameters]]]
+z
+A pointer to the zval to set as undefined
+
+[[[definition]]]
+#define ZVAL_UNDEF(z) do {				\
+		Z_TYPE_INFO_P(z) = IS_UNDEF;	\
+	} while (0)
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/c7a75b7112b12fb7a62bd7cc67d2ef70d3a1280c/Zend/zend_types.h#L653
+
+[[[description]]]
+Sets a zval to undefined (see the [`IS_UNDEF`](https://phpinternals.net/docs/is_undef) type).
+
+[[[additional_information]]]

@@ -1,0 +1,115 @@
+[[[id]]]
+52682656
+
+[[[name]]]
+ZEND_CAST
+
+[[[url]]]
+zend_cast
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZEND_CAST 21
+
+[[[parameters]]]
+
+[[[definition]]]
+ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY, TYPE)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *expr;
+	zval *result = EX_VAR(opline->result.var);
+
+	SAVE_OPLINE();
+	expr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+
+	switch (opline->extended_value) {
+		case IS_NULL:
+			ZVAL_NULL(result);
+			break;
+		case _IS_BOOL:
+			ZVAL_BOOL(result, zend_is_true(expr));
+			break;
+		case IS_LONG:
+			ZVAL_LONG(result, zval_get_long(expr));
+			break;
+		case IS_DOUBLE:
+			ZVAL_DOUBLE(result, zval_get_double(expr));
+			break;
+		case IS_STRING:
+			ZVAL_STR(result, zval_get_string(expr));
+			break;
+		default:
+			if (OP1_TYPE & (IS_VAR|IS_CV)) {
+				ZVAL_DEREF(expr);
+			}
+			/* If value is already of correct type, return it directly */
+			if (Z_TYPE_P(expr) == opline->extended_value) {
+				ZVAL_COPY_VALUE(result, expr);
+				if (OP1_TYPE == IS_CONST) {
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(result))) Z_ADDREF_P(result);
+				} else if (OP1_TYPE != IS_TMP_VAR) {
+					if (Z_OPT_REFCOUNTED_P(result)) Z_ADDREF_P(result);
+				}
+
+				FREE_OP1_IF_VAR();
+				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			}
+
+			if (opline->extended_value == IS_ARRAY) {
+				if (Z_TYPE_P(expr) != IS_OBJECT) {
+					ZVAL_NEW_ARR(result);
+					zend_hash_init(Z_ARRVAL_P(result), 8, NULL, ZVAL_PTR_DTOR, 0);
+					if (Z_TYPE_P(expr) != IS_NULL) {
+						expr = zend_hash_index_add_new(Z_ARRVAL_P(result), 0, expr);
+						if (OP1_TYPE == IS_CONST) {
+							if (UNEXPECTED(Z_OPT_REFCOUNTED_P(expr))) Z_ADDREF_P(expr);
+						} else {
+							if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
+						}
+					}
+				} else {
+					ZVAL_COPY_VALUE(result, expr);
+					Z_ADDREF_P(result);
+					convert_to_array(result);
+				}
+			} else {
+				if (Z_TYPE_P(expr) != IS_ARRAY) {
+					object_init(result);
+					if (Z_TYPE_P(expr) != IS_NULL) {
+						expr = zend_hash_add_new(Z_OBJPROP_P(result), ZSTR_KNOWN(ZEND_STR_SCALAR), expr);
+						if (OP1_TYPE == IS_CONST) {
+							if (UNEXPECTED(Z_OPT_REFCOUNTED_P(expr))) Z_ADDREF_P(expr);
+						} else {
+							if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
+						}
+					}
+				} else {
+					ZVAL_COPY(result, expr);
+					convert_to_object(result);
+				}
+			}
+	}
+
+	FREE_OP1();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/31e4afe3c3654f9c5ab2eafa3a02c62d41c58b47/Zend/zend_vm_def.h#L5180
+
+[[[description]]]
+This opcode is used for the explicit casting operation.
+
+Quick overview:
+ - `op1` - left operand
+ - `op2` - unused
+ - `result` - casted result
+ - `extended_value` - cast type
+ - `op1_type` - CONST|TMP|VAR|CV
+ - `op2_type` - ANY
+
+[[[additional_information]]]

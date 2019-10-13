@@ -1,0 +1,64 @@
+[[[id]]]
+87043015
+
+[[[name]]]
+ZEND_HASH_FOREACH_STR_KEY_VAL
+
+[[[url]]]
+zend_hash_foreach_str_key_val
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZEND_HASH_FOREACH_STR_KEY_VAL(ht, _key, _val)
+
+[[[parameters]]]
+ht
+The [`HashTable *`](https://phpinternals.net/docs/hashtable) to iterate through
+
+_key
+The [`zend_string *`](https://phpinternals.net/docs/zend_string) to store the key in
+
+_val
+The [`zval *`](https://phpinternals.net/docs/zval) to store the value in
+
+[[[definition]]]
+#define ZEND_HASH_FOREACH_STR_KEY_VAL(ht, _key, _val) \
+	ZEND_HASH_FOREACH(ht, 0); \
+	_key = _p->key; \
+	_val = _z;
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/a06ba4b9d6621bd4bb7c387cf1439c7a356c8d72/Zend/zend_hash.h#L910
+
+[[[description]]]
+Iterates through the string keys and values of a [`HashTable`](https://phpinternals.net/docs/hashtable).
+
+See also [`ZEND_HASH_FOREACH_NUM_KEY_VAL`](https://phpinternals.net/docs/zend_hash_foreach_num_key_val) to iterate through the numerical keys and [`ZEND_HASH_FOREACH_KEY_VAL`](https://phpinternals.net/docs/zend_hash_foreach_key_val) to iterate through the mixed keys of a hash table.
+
+[[[additional_information]]]
+For example:
+```c
+void output_ht_str_keys_and_vals(HashTable *ht)
+{
+    zend_string *skey;
+    zval *val;
+
+    ZEND_HASH_FOREACH_STR_KEY_VAL(ht, skey, val) {
+        php_printf("%s => ", ZSTR_VAL(skey));
+        php_debug_zval_dump(val, 0);
+    } ZEND_HASH_FOREACH_END();
+}
+```
+
+Applying the above to the following array:
+```php
+$a = ['z' => 0, 'a' => 1];
+```
+
+Outputs:
+```
+z => int(0)
+a => int(1)
+```

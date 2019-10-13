@@ -1,0 +1,38 @@
+[[[id]]]
+38202229
+
+[[[name]]]
+ZEND_ARG_INFO
+
+[[[url]]]
+zend_arg_info
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZEND_ARG_INFO(pass_by_ref, name)
+
+[[[parameters]]]
+pass_by_ref
+whether the argument passed by reference or value
+
+name
+argument name
+
+[[[definition]]]
+#define ZEND_ARG_INFO(pass_by_ref, name) { #name, 0, pass_by_ref, 0},
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/378aeb86854a0e244b2f1528694b595660b7d533/Zend/zend_API.h#L97
+
+[[[description]]]
+Argument information for built-in functions is important for the sake of the reflection API.
+
+The `ZEND_ARG_INFO` macro only specifies the name of the argument and not the type.
+
+[[[additional_information]]]
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_walk, 0, 0, 2)
+        ZEND_ARG_INFO(1, array) // pass by reference
+        ZEND_ARG_INFO(0, callback)
+    ZEND_END_ARG_INFO()

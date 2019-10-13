@@ -1,0 +1,96 @@
+[[[id]]]
+99197845
+
+[[[name]]]
+Z_PARAM_FUNC
+
+[[[url]]]
+z_param_func
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define Z_PARAM_FUNC(dest_fci, dest_fcc) Z_PARAM_FUNC_EX(dest_fci, dest_fcc, 0, 0)
+
+[[[parameters]]]
+dest_fci
+Stores the function call information (in `zend_fcall_info`)
+
+dest_fcc
+Stores the function call information cache (in `zend_fcall_info_cache`)
+
+[[[definition]]]
+/* Definition of Z_PARAM_FUNC_EX */
+#define Z_PARAM_FUNC_EX(dest_fci, dest_fcc, check_null, separate) \
+	Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, check_null, separate, separate)
+
+/* Definition of Z_PARAM_FUNC_EX2 */
+#define Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, check_null, deref, separate) \
+		Z_PARAM_PROLOGUE(deref, separate); \
+		if (UNEXPECTED(!zend_parse_arg_func(_arg, &dest_fci, &dest_fcc, check_null, &_error))) { \
+			if (!_error) { \
+				_expected_type = Z_EXPECTED_FUNC; \
+				error_code = ZPP_ERROR_WRONG_ARG; \
+				break; \
+			} else { \
+				error_code = ZPP_ERROR_WRONG_CALLBACK; \
+				break; \
+			} \
+		} else if (UNEXPECTED(_error != NULL)) { \
+			zend_wrong_callback_error(_flags & ZEND_PARSE_PARAMS_THROW, E_DEPRECATED, _i, _error); \
+		}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/21cd57e5f2d286ab77ab44a05d2d16c16e4f15e6/Zend/zend_API.h#L901
+
+[[[description]]]
+Specify a parameter that should parsed as a callable.
+
+[[[additional_information]]]
+For example, let's create a function called `invoke` that simply accepts a callable, invokes it, and returns its return value:
+```c
+/* argument information */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_invoke, 0, 0, 1)
+	ZEND_ARG_INFO(0, cb)
+ZEND_END_ARG_INFO()
+
+/* void invoke(callable $c); */
+PHP_FUNCTION(invoke)
+{
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+	zval result;
+
+	// new API
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_FUNC(fci, fcc)
+	ZEND_PARSE_PARAMETERS_END();
+
+	/* old API
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f", &fci, &fcc) != SUCCESS) {
+		return;
+	}
+	*/
+
+	fci.param_count = 0;
+	fci.retval = &result;
+
+	if (zend_call_function(&fci, &fcc) != SUCCESS) {
+		return;
+	}
+
+	*return_value = result;
+}
+```
+
+Usage:
+```php
+$return = invoke(function() {return 1;});
+var_dump($return);
+```
+
+Output:
+```
+int(1)
+```

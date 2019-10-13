@@ -1,0 +1,35 @@
+[[[id]]]
+12473976
+
+[[[name]]]
+HASH_FLAG_PACKED
+
+[[[url]]]
+hash_flag_packed
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define HASH_FLAG_PACKED (1<<2)
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/f18a00b8ce30d9f3f96090c63d575b5d3557d9b5/Zend/zend_hash.h#L40
+
+[[[description]]]
+This flag denotes that a [`HashTable`](https://phpinternals.net/docs/hashtable) is packed (an optimisation introduced into PHP 7.0). This is basically a C array, and so it has a lower memory consumption and faster lookups than a normal hash table. In order for this optimisation to apply, the arrays keys must be natural numbers and be in increasing order (with either small or no gaps between the keys).
+
+The [`HT_IS_PACKED`](https://phpinternals.net/docs/ht_is_packed) macro can be used to check if a hash table is packed.
+
+[[[additional_information]]]
+For example:
+```c
+zend_bool is_packed(HashTable *ht)
+{
+    return !!(ht->u.flags & HASH_FLAG_PACKED);
+}
+```

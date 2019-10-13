@@ -1,0 +1,52 @@
+[[[id]]]
+98970705
+
+[[[name]]]
+ZEND_BW_NOT
+
+[[[url]]]
+zend_bw_not
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZEND_BW_NOT 12
+
+[[[parameters]]]
+
+[[[definition]]]
+ZEND_VM_HANDLER(12, ZEND_BW_NOT, CONST|TMPVAR|CV, ANY)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *op1;
+
+	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		ZVAL_LONG(EX_VAR(opline->result.var), ~Z_LVAL_P(op1));
+		ZEND_VM_NEXT_OPCODE();
+	}
+
+	SAVE_OPLINE();
+	bitwise_not_function(EX_VAR(opline->result.var),
+		GET_OP1_ZVAL_PTR(BP_VAR_R));
+	FREE_OP1();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/31e4afe3c3654f9c5ab2eafa3a02c62d41c58b47/Zend/zend_vm_def.h#L732
+
+[[[description]]]
+This opcode is used for the bitwise NOT operator.
+
+Quick overview:
+ - `op1` - left operand
+ - `op2` - unused
+ - `result` - bitwise NOT result
+ - `extended_value` - unused
+ - `op1_type` - CONST|TMPVAR|CV
+ - `op2_type` - ANY
+
+[[[additional_information]]]

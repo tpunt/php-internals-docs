@@ -1,0 +1,56 @@
+[[[id]]]
+46327515
+
+[[[name]]]
+ZEND_BEGIN_ARG_INFO
+
+[[[url]]]
+zend_begin_arg_info
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZEND_BEGIN_ARG_INFO(name, _unused)
+
+[[[parameters]]]
+name
+Variable name
+
+_unused
+0
+
+[[[definition]]]
+#define ZEND_BEGIN_ARG_INFO(name, _unused)	\
+	ZEND_BEGIN_ARG_INFO_EX(name, 0, ZEND_RETURN_VALUE, -1)
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/378aeb86854a0e244b2f1528694b595660b7d533/Zend/zend_API.h#L123
+
+[[[description]]]
+Begin defining the type hints for arguments of a function or method. The argument information is available for reflection.
+
+The name of the argument information is passed to [`PHP_FE`](https://phpinternals.net/docs/php_fe) or [`PHP_ME`](https://phpinternals.net/docs/php_me) when creating a function entry.
+
+[[[additional_information]]]
+`ZEND_BEGIN_ARG_INFO` assumes that all arguments are required. The [`ZEND_BEGIN_ARG_INFO_EX`](https://phpinternals.net/docs/zend_parse_parameters_start_ex) macro can be used instead, allowing you to specify the number of required arguments and also allows you to specify that the value is returned by reference.
+
+The [`ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO`](https://phpinternals.net/docs/zend_begin_arg_with_return_type_info) and [`ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO`](https://phpinternals.net/docs/zend_begin_arg_with_return_obj_info) macros allow you to specify the return type of the function or method.
+
+Specifying the argument info by itself doesn't enforce the type by throwing a `TypeError`. This needs to be done when parsing the parameters.
+
+For functions with identical argument and return types, the argument information only needs to be defined once.
+
+## Example
+
+```c
+ZEND_BEGIN_ARG_INFO(arginfo_example, 0)
+    ZEND_ARG_OBJ_INFO(0, object, JsonSerializable, 0)
+    ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+const zend_function_entry example_functions[] = {
+    PHP_FE(example, arginfo_example)
+    PHP_FE_END
+};
+```

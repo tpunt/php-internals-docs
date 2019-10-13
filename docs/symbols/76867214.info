@@ -1,0 +1,30 @@
+[[[id]]]
+76867214
+
+[[[name]]]
+HASH_FLAG_STATIC_KEYS
+
+[[[url]]]
+hash_flag_static_keys
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define HASH_FLAG_STATIC_KEYS (1<<4)
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/f18a00b8ce30d9f3f96090c63d575b5d3557d9b5/Zend/zend_hash.h#L42
+
+[[[description]]]
+This flag denotes a [`HashTable`](https://phpinternals.net/docs/hashtable) with either long keys or interned string keys (see [`IS_STR_INTERNED`](https://phpinternals.net/docs/is_str_interned)). Hash tables are assumed to have static keys upon creation, but will have this flag unset if a new entry is being inserted whose key is not a long or interned string.
+
+The purpose of this flag is to optimise the copying and destruction of hash tables. If it is set, no checks or operations need to be performed regarding whether the key needs to be copied or destroyed.
+
+Since packed hash tables (see [`HASH_FLAG_PACKED`](https://phpinternals.net/docs/hash_flag_packed)) use longs as their keys, they will also have this flag set.
+
+[[[additional_information]]]

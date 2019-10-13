@@ -1,0 +1,26 @@
+[[[id]]]
+22346545
+
+[[[name]]]
+IS_REFERENCE
+
+[[[url]]]
+is_reference
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define IS_REFERENCE 10
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/9dada7b291d3fb88a81406cafa5d6fbcb1ee11f0/Zend/zend_types.h#L372
+
+[[[description]]]
+This type is used to denote that a [`zval`](https://phpinternals.net/docs/zval) is a PHP reference. The value of a referenced `zval` needs to be dereferenced first before it can be used. This can be done using either the [`ZVAL_DEREF`](http://phpinternals.net/docs/zval_deref) or [`Z_REF`](http://phpinternals.net/docs/z_ref) macros. A `zval` can be checked to see if it is a reference with the [`Z_ISREF`](http://phpinternals.net/docs/z_isref) macro.
+
+[[[additional_information]]]

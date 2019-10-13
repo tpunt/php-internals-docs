@@ -1,0 +1,36 @@
+[[[id]]]
+5159069
+
+[[[name]]]
+Z_PARAM_ZVAL
+
+[[[url]]]
+z_param_zval
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define Z_PARAM_ZVAL(dest) Z_PARAM_ZVAL_EX(dest, 0, 0)
+
+[[[parameters]]]
+dest
+A [`zval *`](https://phpinternals.net/docs/zval) to store the parameter in
+
+[[[definition]]]
+/* Definition of Z_PARAM_ZVAL_EX */
+#define Z_PARAM_ZVAL_EX(dest, check_null, separate) \
+	Z_PARAM_ZVAL_EX2(dest, check_null, separate, separate)
+
+/* Definition of Z_PARAM_ZVAL_EX2 */
+#define Z_PARAM_ZVAL_EX2(dest, check_null, deref, separate) \
+		Z_PARAM_PROLOGUE(deref, separate); \
+		zend_parse_arg_zval_deref(_arg, &dest, check_null);
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/3395e63d550e8b5237d13f70fc0a097a7ef17049/Zend/zend_API.h#L1083
+
+[[[description]]]
+Specify a generic parameter. If the parameter is passed by reference, then it will either need to be dereferenced with [`ZVAL_DEREF`](https://phpinternals.net/docs/zval_deref), or the [`Z_PARAM_ZVAL_DEREF`](https://phpinternals.net/docs/z_param_zval_deref) parameter parsing macro should be used.
+
+[[[additional_information]]]

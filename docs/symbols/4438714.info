@@ -1,0 +1,30 @@
+[[[id]]]
+4438714
+
+[[[name]]]
+GC_TYPE
+
+[[[url]]]
+gc_type
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define GC_TYPE(p) (p)->gc.u.v.type
+
+[[[parameters]]]
+p
+A pointer to a structure to access its data type
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/272a9f29f5cba3050132e68f7303820743982822/Zend/zend_types.h#L438
+
+[[[description]]]
+Fetches the data type of the garbage-collected type.
+
+This macro is used on any type that holds [garbage collection](https://phpinternals.net/categories/garbage_collector) information directly, such as the [`zend_string`](https://phpinternals.net/docs/zend_string), `HashTable`, and `zend_refcounted` types.
+
+[[[additional_information]]]

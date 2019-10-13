@@ -1,0 +1,57 @@
+[[[id]]]
+10364985
+
+[[[name]]]
+ZEND_HASH_FOREACH_VAL
+
+[[[url]]]
+zend_hash_foreach_val
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZEND_HASH_FOREACH_VAL(ht, _val)
+
+[[[parameters]]]
+ht
+The [`HashTable *`](https://phpinternals.net/docs/hashtable) to iterate through
+
+_val
+The [`zval *`](https://phpinternals.net/docs/zval) to store the value in
+
+[[[definition]]]
+#define ZEND_HASH_FOREACH_VAL(ht, _val) \
+	ZEND_HASH_FOREACH(ht, 0); \
+	_val = _z;
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/b1a8dcc001cdd44afc4529b01ac15a2c6400cbd6/Zend/zend_hash.h#L880
+
+[[[description]]]
+Iterates through the values of a [`HashTable`](https://phpinternals.net/docs/hashtable).
+
+[[[additional_information]]]
+For example:
+```c
+void output_ht_values(HashTable *ht)
+{
+	zval *val;
+
+	ZEND_HASH_FOREACH_VAL(ht, val) {
+		php_debug_zval_dump(val, 0);
+	} ZEND_HASH_FOREACH_END();
+}
+```
+
+Applying the above to the following array:
+```php
+$a = [1,2,3];
+```
+
+Outputs:
+```
+int(1)
+int(2)
+int(3)
+```

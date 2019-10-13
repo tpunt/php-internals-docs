@@ -1,0 +1,26 @@
+[[[id]]]
+12131770
+
+[[[name]]]
+IS_LONG
+
+[[[url]]]
+is_long
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define IS_LONG 4
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/9dada7b291d3fb88a81406cafa5d6fbcb1ee11f0/Zend/zend_types.h#L366
+
+[[[description]]]
+This type is used to represent integer values in PHP. The [`Z_LVAL`](https://phpinternals.net/docs/z_lval) macro can be used to fetch this type from a [zval](https://phpinternals.net/docs/zval), and the [`ZVAL_LONG`](https://phpinternals.net/docs/zval_long) macro can be used to set this type.
+
+[[[additional_information]]]

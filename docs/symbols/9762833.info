@@ -1,0 +1,31 @@
+[[[id]]]
+9762833
+
+[[[name]]]
+ecalloc
+
+[[[url]]]
+ecalloc
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ecalloc(nmemb, size) _ecalloc((nmemb), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+
+[[[parameters]]]
+nmemb
+The number of `size`s to allocate
+
+size
+The size (in bytes) to allocate
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/5c9330bb878451c61cc99c888b2bc11c3f913b12/Zend/zend_alloc.h#L166
+
+[[[description]]]
+Allocates `nmemb` * `size` bytes of memory from the [ZMM](https://phpinternals.net/categories/zend_memory_manager), initialising it to `0`s.
+
+[[[additional_information]]]

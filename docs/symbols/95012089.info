@@ -1,0 +1,26 @@
+[[[id]]]
+95012089
+
+[[[name]]]
+IS_FALSE
+
+[[[url]]]
+is_false
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define IS_FALSE 2
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/c8efaea1e3f93b5b836a38c6985b67983b1dc95a/Zend/zend_types.h#L364
+
+[[[description]]]
+This type is used to represent the boolean `false` value in PHP. Either the [`ZVAL_FALSE`](https://phpinternals.net/docs/zval_false) or [`ZVAL_BOOL`](https://phpinternals.net/docs/zval_bool) macros can be used to set this type.
+
+[[[additional_information]]]

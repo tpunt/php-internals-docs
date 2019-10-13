@@ -1,0 +1,41 @@
+[[[id]]]
+35287828
+
+[[[name]]]
+zend_hash_find_ind
+
+[[[url]]]
+zend_hash_find_ind
+
+[[[type]]]
+function
+
+[[[declaration]]]
+static zend_always_inline zval *zend_hash_find_ind(const HashTable *ht, zend_string *key)
+
+[[[parameters]]]
+ht
+The hash table to search
+
+key
+The lookup key
+
+[[[definition]]]
+static zend_always_inline zval *zend_hash_find_ind(const HashTable *ht, zend_string *key)
+{
+	zval *zv;
+
+	zv = zend_hash_find(ht, key);
+	return (zv && Z_TYPE_P(zv) == IS_INDIRECT) ? 
+		((Z_TYPE_P(Z_INDIRECT_P(zv)) != IS_UNDEF) ? Z_INDIRECT_P(zv) : NULL) : zv;
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/c8efaea1e3f93b5b836a38c6985b67983b1dc95a/Zend/zend_hash.h#L310
+
+[[[description]]]
+Finds the value for a given key. Values of type [`IS_INDIRECT`](https://phpinternals.net/docs/is_indirect) are dereferenced before being returned.
+
+See also [`zend_hash_str_find_ind`](https://phpinternals.net/docs/zend_hash_str_find_ind), the C string variant of this function.
+
+[[[additional_information]]]

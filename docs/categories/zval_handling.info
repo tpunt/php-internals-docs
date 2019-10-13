@@ -1,0 +1,174 @@
+[[[name]]]
+Zval Handling
+
+[[[url]]]
+zval_handling
+
+[[[subcategories]]]
+
+[[[supercategories]]]
+
+[[[articles]]]
+
+[[[symbols]]]
+71823373
+92431168
+26076435
+49831234
+7647381
+27590050
+92150196
+8231017
+49228232
+10545004
+1253177
+93775058
+58928991
+22346545
+86225107
+70316271
+23927499
+4100218
+72815114
+32208715
+74849580
+65920513
+45065697
+65575191
+86944268
+54887571
+88946937
+99021134
+63036591
+28637512
+86902682
+16671265
+65989860
+29593350
+56090264
+26996408
+33981621
+30945837
+14116116
+4023574
+19441524
+95012089
+37783473
+55907140
+98773379
+41100430
+86397599
+5896944
+23239776
+8924116
+38062183
+12131770
+86571197
+97031846
+51406079
+59545586
+44985345
+53429698
+50959706
+39826397
+50769178
+92250376
+79087183
+92238890
+48200025
+69950349
+92118809
+59801089
+34122318
+59054665
+14588636
+5443436
+78006698
+14426356
+30912421
+61142138
+94457578
+43301773
+45330093
+18294965
+57022600
+4819457
+99879117
+96098462
+45837082
+73657027
+62785793
+81099882
+
+[[[body]]]
+The zval is Zend's basic unit of storage that is used to hold every value we see in PHP.
+
+For comprehensive articles on the structure of zvals, checkout out Nikita's articles:
+ - [Internal Value Representation in PHP 7 - Part 1](http://nikic.github.io/2015/05/05/Internal-value-representation-in-PHP-7-part-1.html)
+ - [Internal Value Representation in PHP 7 - Part 2](http://nikic.github.io/2015/06/19/Internal-value-representation-in-PHP-7-part-2.html)
+
+## Types
+
+Data types:
+ - [`IS_UNDEF`](https://phpinternals.net/docs/is_undef)
+ - [`IS_NULL`](https://phpinternals.net/docs/is_null)
+ - [`IS_FALSE`](https://phpinternals.net/docs/is_false)
+ - [`IS_TRUE`](https://phpinternals.net/docs/is_true)
+ - [`IS_LONG`](https://phpinternals.net/docs/is_long)
+ - [`IS_DOUBLE`](https://phpinternals.net/docs/is_double)
+ - [`IS_STRING`](https://phpinternals.net/docs/is_string)
+ - [`IS_ARRAY`](https://phpinternals.net/docs/is_array)
+ - [`IS_OBJECT`](https://phpinternals.net/docs/is_object)
+ - [`IS_REFERENCE`](https://phpinternals.net/docs/is_reference)
+ - [`IS_PTR`](https://phpinternals.net/docs/is_ptr) (internal)
+ - [`IS_INDIRECT`](https://phpinternals.net/docs/is_indirect) (internal)
+
+Flag types:
+ - [`IS_TYPE_CONSTANT`](https://phpinternals.net/docs/is_type_constant)
+ - [`IS_TYPE_COPYABLE`](https://phpinternals.net/docs/is_type_copyable)
+ - [`IS_TYPE_REFCOUNTED`](https://phpinternals.net/docs/is_type_refcounted)
+
+## Type Handling
+
+Data type checking:
+ - [`Z_TYPE`](https://phpinternals.net/docs/z_type) and [`Z_OPT_TYPE`](https://phpinternals.net/docs/z_opt_type)
+ - [`Z_TYPE_INFO`](https://phpinternals.net/docs/z_type_info)
+ - [`Z_ISUNDEF`](https://phpinternals.net/docs/z_isundef)
+ - [`Z_ISNULL`](https://phpinternals.net/docs/z_isnull)
+ - [`Z_ISREF`](https://phpinternals.net/docs/z_isref)
+
+Value setting:
+ - [`Z_TYPE_INFO`](https://phpinternals.net/docs/z_type_info)
+ - [`ZVAL_UNDEF`](https://phpinternals.net/docs/zval_undef)
+ - [`ZVAL_NULL`](https://phpinternals.net/docs/zval_null), [`RETVAL_NULL`](https://phpinternals.net/docs/retval_null)
+ - [`ZVAL_FALSE`](https://phpinternals.net/docs/zval_false), [`RETVAL_FALSE`](https://phpinternals.net/docs/retval_false)
+ - [`ZVAL_TRUE`](https://phpinternals.net/docs/zval_true), [`RETVAL_TRUE`](https://phpinternals.net/docs/retval_true)
+ - [`ZVAL_BOOL`](https://phpinternals.net/docs/zval_bool), [`RETVAL_BOOL`](https://phpinternals.net/docs/retval_bool)
+ - [`ZVAL_LONG`](https://phpinternals.net/docs/zval_long), [`RETVAL_LONG`](https://phpinternals.net/docs/retval_long)
+ - [`ZVAL_DOUBLE`](https://phpinternals.net/docs/zval_double), [`RETVAL_DOUBLE`](https://phpinternals.net/docs/retval_double)
+ - [`ZVAL_STR`](https://phpinternals.net/docs/zval_str), [`ZVAL_INTERNED_STR`](https://phpinternals.net/docs/zval_interned_str), [`ZVAL_NEW_STR`](https://phpinternals.net/docs/zval_new_str), [`RETVAL_STR`](https://phpinternals.net/docs/retval_str), [`RETVAL_INTERNED_STR`](https://phpinternals.net/docs/retval_interned_str), [`RETVAL_NEW_STR`](https://phpinternals.net/docs/retval_new_str)
+ - [`ZVAL_ARR`](https://phpinternals.net/docs/zval_arr)
+ - [`ZVAL_OBJ`](https://phpinternals.net/docs/zval_obj), [`RETVAL_OBJ`](https://phpinternals.net/docs/retval_obj)
+ - [`ZVAL_INDIRECT`](https://phpinternals.net/docs/zval_indirect)
+
+Value retrieval (and sometimes setting):
+ - [`Z_LVAL`](https://phpinternals.net/docs/z_lval)
+ - [`Z_DVAL`](https://phpinternals.net/docs/z_dval)
+ - [`Z_STR`](https://phpinternals.net/docs/z_str), [`Z_STRVAL`](https://phpinternals.net/docs/z_strval), [`Z_STRLEN`](https://phpinternals.net/docs/z_strlen), and [`Z_STRHASH`](https://phpinternals.net/docs/z_strhash)
+ - [`Z_ARR`](https://phpinternals.net/docs/z_arr) and [`Z_ARRVAL`](https://phpinternals.net/docs/z_arrval)
+ - [`Z_OBJ`](https://phpinternals.net/docs/z_obj)
+ - [`Z_REF`](https://phpinternals.net/docs/z_ref) and [`Z_OPT_ISREF`](https://phpinternals.net/docs/z_opt_isref)
+ - [`Z_COUNTED`](https://phpinternals.net/docs/z_counted)
+ - [`Z_INDIRECT`](https://phpinternals.net/docs/z_indirect)
+
+Flag type checking:
+ - [`Z_TYPE_FLAGS`](https://phpinternals.net/docs/z_type_flags)
+ - [`Z_CONSTANT`](https://phpinternals.net/docs/z_constant) and [`Z_OPT_CONSTANT`](https://phpinternals.net/docs/z_opt_constant)
+ - [`Z_COPYABLE`](https://phpinternals.net/docs/z_copyable) and [`Z_OPT_COPYABLE`](https://phpinternals.net/docs/z_opt_copyable)
+ - [`Z_REFCOUNTED`](https://phpinternals.net/docs/z_refcounted) and [`Z_OPT_REFCOUNTED`](https://phpinternals.net/docs/z_opt_refcounted)
+
+Flag type setting:
+ - [`Z_TYPE_FLAGS`](https://phpinternals.net/docs/z_type_flags)
+
+
+The `Z_OPT_*` macros are micro-optimised versions of the normal `Z_*` macros.

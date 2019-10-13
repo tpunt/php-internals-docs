@@ -1,0 +1,92 @@
+[[[id]]]
+48969674
+
+[[[name]]]
+Z_PARAM_STR
+
+[[[url]]]
+z_param_str
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define Z_PARAM_STR(dest) Z_PARAM_STR_EX(dest, 0, 0)
+
+[[[parameters]]]
+dest
+A [`zend_string *`](https://phpinternals.net/docs/zend_string) to store the parameter in
+
+[[[definition]]]
+/* Definition of Z_PARAM_STR_EX */
+#define Z_PARAM_STR_EX(dest, check_null, separate) \
+	Z_PARAM_STR_EX2(dest, check_null, separate, separate)
+
+/* Definition of Z_PARAM_STR_EX2 */
+#define Z_PARAM_STR_EX2(dest, check_null, deref, separate) \
+		Z_PARAM_PROLOGUE(deref, separate); \
+		if (UNEXPECTED(!zend_parse_arg_str(_arg, &dest, check_null))) { \
+			_expected_type = Z_EXPECTED_STRING; \
+			error_code = ZPP_ERROR_WRONG_ARG; \
+			break; \
+		}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/86bd6ab72c0f32979551ea44d30a9fe7ed3c99ad/Zend/zend_API.h#L1072
+
+[[[description]]]
+Specify a parameter that should parsed as a string into a [`zend_string`](https://phpinternals.net/docs/zend_string).
+
+[[[additional_information]]]
+For example, let's create a function called `var_info` that outputs a variable's reference count and whether it is a reference or not. We do this by fetching the variable its name, because by passing in a string we do not modify its reference count (making it more reliable).
+```c
+/* argument information */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_var_info, 0, 0, 1)
+	ZEND_ARG_INFO(0, varName)
+ZEND_END_ARG_INFO()
+
+/* void var_info(string $varName) */
+PHP_FUNCTION(var_info)
+{
+	zend_string *arg;
+
+	// new API
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(arg)
+	ZEND_PARSE_PARAMETERS_END();
+
+	/* old API
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &arg) == FAILURE) {
+		return;
+	}
+	*/
+
+	zval *v = zend_hash_find(&EG(symbol_table), arg);
+
+	if (v) {
+		v = Z_INDIRECT_P(v);
+
+		php_printf("$%s:\n", ZSTR_VAL(arg));
+		php_printf("\tReference count: %d\n", Z_REFCOUNTED_P(v) ? Z_REFCOUNT_P(v) : -1);
+		php_printf("\tIs reference?: %s\n", Z_ISREF_P(v) ? "yes" : "no");
+	}
+}
+```
+
+Usage:
+```php
+$a = [];
+$b = &$a;
+var_info('a');
+```
+
+Output:
+```
+$a:
+	Reference count: 2
+	Is reference?: yes
+```
+
+Note that the above uses the global symbol table, and so it will only find variables declared within the global scope.
+
+Also, if you're wondering why the reference count is two, then take a look at the [Handling PHP References](https://phpinternals.net/categories/garbage_collector#handling-php-references) section of the [Garbage Collector](https://phpinternals.net/categories/garbage_collector).

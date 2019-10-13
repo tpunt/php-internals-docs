@@ -1,0 +1,42 @@
+[[[id]]]
+75086885
+
+[[[name]]]
+FREE_HASHTABLE
+
+[[[url]]]
+free_hashtable
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define FREE_HASHTABLE(ht) efree_size(ht, sizeof(HashTable))
+
+[[[parameters]]]
+ht
+The [`HashTable *`](https://phpinternals.net/docs/hashtable) variable to free
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/17b39f1216bf213838c7975d266808d4bc7ffb4c/Zend/zend_alloc.h#L230
+
+[[[description]]]
+Frees an allocated [`HashTable`](https://phpinternals.net/docs/hashtable).
+
+[[[additional_information]]]
+Example:
+```c
+HashTable *ht;
+
+ALLOC_HASHTABLE(ht); // allocate the hash table
+
+zend_hash_init(ht, 0, NULL, ZVAL_PTR_DTOR, 0); // initialise it
+
+// manipulate it...
+
+zend_hash_destroy(ht); // free the buckets
+
+FREE_HASHTABLE(ht); // free the hash table itself
+```

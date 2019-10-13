@@ -1,0 +1,76 @@
+[[[id]]]
+79017288
+
+[[[name]]]
+Z_PARAM_CLASS
+
+[[[url]]]
+z_param_class
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define Z_PARAM_CLASS(dest) Z_PARAM_CLASS_EX(dest, 0, 0)
+
+[[[parameters]]]
+dest
+The `zend_class_entry *` to check the argument against, and then store the argument in. If `dest` is `NULL`, then any class name is accepted.
+
+[[[definition]]]
+#define Z_PARAM_CLASS_EX(dest, check_null, separate) \
+	Z_PARAM_CLASS_EX2(dest, check_null, separate, separate)
+
+#define Z_PARAM_CLASS_EX2(dest, check_null, deref, separate) \
+		Z_PARAM_PROLOGUE(deref, separate); \
+		if (UNEXPECTED(!zend_parse_arg_class(_arg, &dest, _i, check_null))) { \
+			error_code = ZPP_ERROR_FAILURE; \
+			break; \
+		}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/ebb339625d9b1335a1dcb7ab355d27d999f7413b/Zend/zend_API.h#L864
+
+[[[description]]]
+Fetches the class entry of the string argument, ensuring that it is of the class entry type `dest` (if it is not `NULL`).
+
+[[[additional_information]]]
+For example, let's create a function that requires an `SplObserver` class entry type to be specified:
+```c
+/* argument information */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_set_observer_ce, 0, 0, 1)
+	ZEND_ARG_INFO(0, ce_name)
+ZEND_END_ARG_INFO()
+
+/* void set_observer_ce(string $className) */
+PHP_FUNCTION(set_observer_ce)
+{
+	zend_class_entry *ce = spl_ce_SplObserver;
+
+	// new API
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_CLASS(ce)
+	ZEND_PARSE_PARAMETERS_END();
+
+	/* old API
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "C", &ce) == FAILURE) {
+		return;
+	}
+	*/
+
+	// do something with ce
+}
+```
+
+Usage:
+```php
+class SomeObserver implements SplObserver {function update($s){}}
+
+set_observer_ce('SomeObserver'); // ok
+set_observer_ce('StdClass'); // invalid
+```
+
+Output:
+```
+Warning: set_observer_ce() expects parameter 1 to be a class name derived from SplObserver, 'StdClass' given in %s on line %d
+```

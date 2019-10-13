@@ -1,0 +1,84 @@
+[[[id]]]
+76475867
+
+[[[name]]]
+Z_PARAM_ARRAY_HT
+
+[[[url]]]
+z_param_array_ht
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define Z_PARAM_ARRAY_HT(dest) Z_PARAM_ARRAY_HT_EX(dest, 0, 0)
+
+[[[parameters]]]
+dest
+A [`HashTable *`](https://phpinternals.net/docs/hashtable) to store the parameter in
+
+[[[definition]]]
+/* Declaration of Z_PARAM_ARRAY_HT_EX */
+#define Z_PARAM_ARRAY_HT_EX(dest, check_null, separate) \
+	Z_PARAM_ARRAY_HT_EX2(dest, check_null, separate, separate)
+
+/* Declaration of Z_PARAM_ARRAY_HT_EX2 */
+#define Z_PARAM_ARRAY_HT_EX2(dest, check_null, deref, separate) \
+		Z_PARAM_PROLOGUE(deref, separate); \
+		if (UNEXPECTED(!zend_parse_arg_array_ht(_arg, &dest, check_null, 0, separate))) { \
+			_expected_type = Z_EXPECTED_ARRAY; \
+			error_code = ZPP_ERROR_WRONG_ARG; \
+			break; \
+		}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/67be32ced9a7ec23280aaf5409a819f13ff62e90/Zend/zend_API.h#L916
+
+[[[description]]]
+Specify a parameter that should parsed as an array into a [`HashTable`](https://phpinternals.net/docs/hashtable).
+
+[[[additional_information]]]
+For example, let's create a basic function, `sum_of_array` that accepts an array of integers and returns the sum of those integers (ignoring other values, overflow checks, etc):
+```c
+/* Argument information */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sum_of_array, 0, 0, 1)
+    ZEND_ARG_INFO(0, array)
+ZEND_END_ARG_INFO()
+
+/* int sum_of_array(array $a); */
+PHP_FUNCTION(sum_of_array)
+{
+    HashTable *arg;
+    zval *element;
+    zend_long sum = 0;
+
+    // new API
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_ARRAY_HT(arg)
+    ZEND_PARSE_PARAMETERS_END();
+
+    /* old API
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &arg) != SUCCESS) {
+        return;
+    }
+    */
+
+    ZEND_HASH_FOREACH_VAL(arg, element) {
+        if (Z_TYPE_P(element) == IS_LONG) {
+            sum += Z_LVAL_P(element);
+        }
+    } ZEND_HASH_FOREACH_END();
+
+    RETVAL_LONG(sum);
+}
+```
+
+Usage:
+```php
+var_dump(sum_of_array([1,2,3]));
+```
+
+Output:
+```
+int(6)
+```

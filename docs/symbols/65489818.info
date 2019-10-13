@@ -1,0 +1,89 @@
+[[[id]]]
+65489818
+
+[[[name]]]
+Z_PARAM_STRING
+
+[[[url]]]
+z_param_string
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define Z_PARAM_STRING(dest, dest_len) Z_PARAM_STRING_EX(dest, dest_len, 0, 0)
+
+[[[parameters]]]
+dest
+A `char *` to store the parameter in
+
+dest_len
+A `size_t` to store the parameter in
+
+[[[definition]]]
+/* Definition of Z_PARAM_STRING_EX */
+#define Z_PARAM_STRING_EX(dest, dest_len, check_null, separate) \
+	Z_PARAM_STRING_EX2(dest, dest_len, check_null, separate, separate)
+
+/* Definition of Z_PARAM_STRING_EX2 */
+#define Z_PARAM_STRING_EX2(dest, dest_len, check_null, deref, separate) \
+		Z_PARAM_PROLOGUE(deref, separate); \
+		if (UNEXPECTED(!zend_parse_arg_string(_arg, &dest, &dest_len, check_null))) { \
+			_expected_type = Z_EXPECTED_STRING; \
+			error_code = ZPP_ERROR_WRONG_ARG; \
+			break; \
+		}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/86bd6ab72c0f32979551ea44d30a9fe7ed3c99ad/Zend/zend_API.h#L1057
+
+[[[description]]]
+Specify a parameter that should parsed as a string into a C character array.
+
+[[[additional_information]]]
+For example, let's create a function called `reverse_string`:
+```c
+/* argument information */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_reverse_string, 0, 0, 1)
+	ZEND_ARG_INFO(1, varName)
+ZEND_END_ARG_INFO()
+
+/* void reverse_string(string &$str) */
+PHP_FUNCTION(reverse_string)
+{
+	char *str;
+	size_t len;
+
+	// new API
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING_EX(str, len, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+
+	/* old API
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str, &len) == FAILURE) {
+		return;
+	}
+	*/
+
+	for (int l = 0, r = len - 1; l < r; ++l, --r) {
+		char tmp = str[l];
+
+		str[l] = str[r];
+		str[r] = tmp;
+	}
+}
+```
+
+Usage:
+```php
+$a = "abc";
+
+reverse_string($a);
+
+var_dump($a);
+```
+
+Output:
+```
+string(3) "cba"
+```

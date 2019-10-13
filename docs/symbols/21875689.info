@@ -1,0 +1,26 @@
+[[[id]]]
+21875689
+
+[[[name]]]
+ZEND_RESULT_CODE
+
+[[[url]]]
+zend_result_code
+
+[[[type]]]
+type
+
+[[[declaration]]]
+typedef enum { SUCCESS =  0, FAILURE = -1} ZEND_RESULT_CODE;
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/ec2823fb8c090c0d71f231c18a609d28b5b7b240/Zend/zend_types.h#L49
+
+[[[description]]]
+The `SUCCESS` and `FAILURE` constants should always be used when checking the success or failure of a predicate function. This ensures consistency of the result codes used and prevents subtle bugs in code (such as checking for the truthiness of an operation that was successful).
+
+[[[additional_information]]]

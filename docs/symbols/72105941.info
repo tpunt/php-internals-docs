@@ -1,0 +1,103 @@
+[[[id]]]
+72105941
+
+[[[name]]]
+zend_hash_destroy
+
+[[[url]]]
+zend_hash_destroy
+
+[[[type]]]
+function
+
+[[[declaration]]]
+ZEND_API void ZEND_FASTCALL zend_hash_destroy(HashTable *ht)
+
+[[[parameters]]]
+ht
+The [`HashTable *`](https://phpinternals.net/docs/hashtable) to free the buckets of
+
+[[[definition]]]
+ZEND_API void ZEND_FASTCALL zend_hash_destroy(HashTable *ht)
+{
+	Bucket *p, *end;
+
+	IS_CONSISTENT(ht);
+	HT_ASSERT(ht, GC_REFCOUNT(ht) <= 1);
+
+	if (ht->nNumUsed) {
+		p = ht->arData;
+		end = p + ht->nNumUsed;
+		if (ht->pDestructor) {
+			SET_INCONSISTENT(HT_IS_DESTROYING);
+
+			if (HT_HAS_STATIC_KEYS_ONLY(ht)) {
+				if (HT_IS_WITHOUT_HOLES(ht)) {
+					do {
+						ht->pDestructor(&p->val);
+					} while (++p != end);
+				} else {
+					do {
+						if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+							ht->pDestructor(&p->val);
+						}
+					} while (++p != end);
+				}
+			} else if (HT_IS_WITHOUT_HOLES(ht)) {
+				do {
+					ht->pDestructor(&p->val);
+					if (EXPECTED(p->key)) {
+						zend_string_release(p->key);
+					}
+				} while (++p != end);
+			} else {
+				do {
+					if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+						ht->pDestructor(&p->val);
+						if (EXPECTED(p->key)) {
+							zend_string_release(p->key);
+						}
+					}
+				} while (++p != end);
+			}
+
+			SET_INCONSISTENT(HT_DESTROYED);
+		} else {
+			if (!HT_HAS_STATIC_KEYS_ONLY(ht)) {
+				do {
+					if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+						if (EXPECTED(p->key)) {
+							zend_string_release(p->key);
+						}
+					}
+				} while (++p != end);
+			}
+		}
+		zend_hash_iterators_remove(ht);
+	} else if (EXPECTED(!(ht->u.flags & HASH_FLAG_INITIALIZED))) {
+		return;
+	}
+	pefree(HT_GET_DATA_ADDR(ht), ht->u.flags & HASH_FLAG_PERSISTENT);
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/80745e69143cae33b8acbdcbecb0232738e5475a/Zend/zend_hash.c#L1218
+
+[[[description]]]
+Frees the buckets of a [`HashTable *`](https://phpinternals.net/docs/hashtable).
+
+[[[additional_information]]]
+Example:
+```c
+HashTable *ht;
+
+ALLOC_HASHTABLE(ht); // allocate the hash table
+
+zend_hash_init(ht, 0, NULL, ZVAL_PTR_DTOR, 0); // initialise it
+
+// manipulate it...
+
+zend_hash_destroy(ht); // free the buckets
+
+FREE_HASHTABLE(ht); // free the hash table itself
+```

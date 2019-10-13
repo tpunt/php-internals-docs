@@ -1,0 +1,104 @@
+[[[id]]]
+3027736
+
+[[[name]]]
+ZEND_HASH_APPLY_PROTECTION
+
+[[[url]]]
+zend_hash_apply_protection
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZEND_HASH_APPLY_PROTECTION(ht) ((ht)->u.flags & HASH_FLAG_APPLY_PROTECTION)
+
+[[[parameters]]]
+ht
+The [`HashTable *`](https://phpinternals.net/docs/hashtable) variable to check
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/b1a8dcc001cdd44afc4529b01ac15a2c6400cbd6/Zend/zend_hash.h#L981
+
+[[[description]]]
+Checks to see if a [`HashTable`](https://phpinternals.net/docs/hashtable) has recursion protection applied to it (see [`HASH_FLAG_APPLY_PROTECTION`](https://phpinternals.net/docs/hash_flag_apply_protection)).
+
+[[[additional_information]]]
+For example:
+```c
+void output_object(zval *zobj, int level)
+{
+	zend_string *key;
+	zval *val;
+	HashTable *props;
+
+	if (Z_TYPE_P(zobj) != IS_OBJECT) { // if it's not an object, then don't bother outputting it
+		php_printf("Some other type\n");
+		return;
+	}
+
+	props = Z_OBJPROP_P(zobj); // fetch the object property table
+
+	// if recursion protection is applied, and the apply count has already been incremented
+	if (ZEND_HASH_APPLY_PROTECTION(props) && Z_OBJ_APPLY_COUNT_P(zobj) > 0) {
+		php_printf("*RECURSION*\n");
+		return;
+	}
+
+	for (int i = 0; i < level; ++i) {
+		php_printf("  "); // indentation
+	}
+
+	php_printf("%s (%d) {\n", ZSTR_VAL(Z_OBJCE_P(zobj)->name), Z_OBJ_P(zobj)->handle);
+
+	++level;
+
+	// iterate through the properties table
+	ZEND_HASH_FOREACH_STR_KEY_VAL(props, key, val) {
+		for (int i = 0; i < level; ++i) {
+			php_printf("  "); // indentation
+		}
+
+		php_printf("%s = ", ZSTR_VAL(key));
+
+		switch (Z_TYPE_P(val)) {
+			case IS_OBJECT:
+				if (ZEND_HASH_APPLY_PROTECTION(props)) {
+					Z_OBJ_INC_APPLY_COUNT_P(zobj); // increment the apply count for this object
+				}
+
+				output_object(val, level + 1);
+
+				if (ZEND_HASH_APPLY_PROTECTION(props)) {
+					Z_OBJ_DEC_APPLY_COUNT_P(zobj);  // decrement the apply count for this object
+				}
+				break;
+			default:
+				php_printf("Some other type\n");
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	--level;
+
+	for (int i = 0; i < level; ++i) {
+		php_printf("  "); // indentation
+	}
+
+	php_printf("}\n");
+}
+```
+
+Applying the above on an object such as:
+```php
+$o = new StdClass;
+$o->o = $o;
+```
+
+Will output:
+```
+stdClass (1) {
+  o = *RECURSION*
+}
+```

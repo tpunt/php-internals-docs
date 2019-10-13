@@ -1,0 +1,26 @@
+[[[id]]]
+26884319
+
+[[[name]]]
+PHP_FUNCTION
+
+[[[url]]]
+php_function
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define PHP_FUNCTION ZEND_FUNCTION
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/e147ef16166f0832caa0b266c4d154fdeec66da9/main/php.h#L411
+
+[[[description]]]
+Alias of [`ZEND_FUNCTION`](https://phpinternals.net/docs/zend_function). This is the variant that should be used by extensions.
+
+[[[additional_information]]]

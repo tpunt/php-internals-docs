@@ -1,0 +1,58 @@
+[[[id]]]
+46173577
+
+[[[name]]]
+ZEND_HASH_FOREACH_NUM_KEY
+
+[[[url]]]
+zend_hash_foreach_num_key
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZEND_HASH_FOREACH_NUM_KEY(ht, _h)
+
+[[[parameters]]]
+ht
+The [`HashTable *`](https://phpinternals.net/docs/hashtable) to iterate through
+
+_h
+The [`zend_long`](https://phpinternals.net/docs/zend_long) to store the key in
+
+[[[definition]]]
+#define ZEND_HASH_FOREACH_NUM_KEY(ht, _h) \
+	ZEND_HASH_FOREACH(ht, 0); \
+	_h = _p->h;
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/b1a8dcc001cdd44afc4529b01ac15a2c6400cbd6/Zend/zend_hash.h#L892
+
+[[[description]]]
+Iterates through the numerical keys of a [`HashTable`](https://phpinternals.net/docs/hashtable). If the key is a string, then its hash value will be output.
+
+See also [`ZEND_HASH_FOREACH_STR_KEY`](https://phpinternals.net/docs/zend_hash_foreach_str_key) to iterate through the string keys and [`ZEND_HASH_FOREACH_KEY`](https://phpinternals.net/docs/zend_hash_foreach_key) to iterate through the mixed keys of a hash table.
+
+[[[additional_information]]]
+For example:
+```c
+void output_ht_num_keys(HashTable *ht)
+{
+	zend_long key;
+
+	ZEND_HASH_FOREACH_NUM_KEY(ht, key) {
+		php_printf("%d\n", key);
+	} ZEND_HASH_FOREACH_END();
+}
+```
+
+Applying the above to the following array:
+```php
+$a = [0 => 0, 'a' => 1];
+```
+
+Outputs:
+```
+0
+177670
+```

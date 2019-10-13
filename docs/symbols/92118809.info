@@ -1,0 +1,26 @@
+[[[id]]]
+92118809
+
+[[[name]]]
+IS_TYPE_CONSTANT
+
+[[[url]]]
+is_type_constant
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define IS_TYPE_CONSTANT (1<<0)
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/ace9fe53173974ec63f9e0357a6e8372ff5adb3b/Zend/zend_types.h#L465
+
+[[[description]]]
+This is used to denote a whether a zval is a constant (class or global). This is typically checked via the [`Z_CONSTANT`](http://phpinternals.net/docs/z_constant) macro.
+
+[[[additional_information]]]

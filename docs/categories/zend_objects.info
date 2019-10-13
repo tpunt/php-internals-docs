@@ -1,0 +1,130 @@
+[[[name]]]
+Zend Objects
+
+[[[url]]]
+zend_objects
+
+[[[subcategories]]]
+
+[[[supercategories]]]
+
+[[[articles]]]
+
+[[[symbols]]]
+94132293
+49680615
+49228232
+4100218
+72815114
+74849580
+49179784
+86902682
+61413841
+97031846
+51406079
+48057973
+13462309
+27895741
+8584736
+87371429
+8161344
+
+[[[body]]]
+Objects in PHP are reference-based (see [`IS_TYPE_REFCOUNTED`](https://phpinternals.net/docs/is_type_refcounted)) , garbage collectable (see [`GC_COLLECTABLE`](https://phpinternals.net/docs/gc_collectable)) types.
+
+## Object Handlers
+
+PHP objects expose a number of handlers that enable for their default behaviour to be customised. These handlers are typically set during the [module initialisation](https://phpinternals.net/categories/extensions#module-startup) phase, alongside the class registration code. Each class will have its own set of object handlers, where those handlers will be set upon the new object that was created inside of the `create_object` class handler.
+
+For example:
+```c
+zend_object_handlers new_class_obj_handlers; // usually some global
+
+PHP_MINIT_FUNCTION(ext_name)
+{
+    // register a new class
+
+    // set the object handlers for the respective class
+    zend_object_handlers *stdh = zend_get_std_object_handlers(); // default handlers
+
+    memcpy(&new_class_obj_handlers, stdh, sizeof(zend_object_handlers)); // set all handlers to defaults
+
+    // set custom handlers, e.g.
+    // new_class_obj_handlers.dtor_obj = new_class_dtor_obj_handler;
+}
+
+// class entry create_object handler
+zend_object* new_class_create_object(zend_class_entry *entry)
+{
+    zend_object *new_class_obj = ecalloc(1, sizeof(zend_object) + zend_object_properties_size(entry));
+
+    new_class_obj->handlers = new_class_obj_handlers;
+
+    return new_class_obj;
+}
+```
+
+A list of the exposed objects handlers can be seen below.
+
+### offset
+
+When creating objects, it's common to store the object in a custom structure in order to store additional data alongside it:
+```c
+typedef struct _custom_obj_t {
+    int val;
+    zend_object obj;
+} custom_obj_t;
+```
+
+When creating a new object (via the `create_object` class entry handler), the `custom_object_t` type would be allocated by the [ZMM](https://phpinternals.net/categories/zend_memory_manager), where the nested `zend_object` member would be used as normal. This enables for the starting memory location of the enclosing `custom_object_t` structure to be fetched from a `zend_object` pointer by taking away the size of all members before the `obj` member (calculated by the `XtOffsetOf` macro). It's this value that is saved inside of `offset` (so it's not really a handler, but rather a convenience storage).
+
+For example:
+```c
+/* create_object handler */
+custom_obj_t *cobj = ecalloc(1, sizeof(custom_obj_t) + zend_object_properties_size(ce));
+
+// initialise object and properties of &cobj->obj
+
+/* MINIT handler */
+obj_handlers.offset = XtOffsetOf(custom_obj_t, obj);
+
+/* some PHP_FUNCTION */
+zval *zobj = ... // stores our custom zend_object type
+custom_obj_t *cobj = (custom_obj_t *)((char *)Z_OBJ_P(obj) - Z_OBJ_P(obj)->handlers->offset);
+
+cobj->val; // access custom object data
+```
+
+Also noteworthy is that the `obj` member must be the last member in the structure, because the default properties table of an object is allocated as part of the object allocation (using the C structure hack).
+
+### free_obj
+
+This is used to implement custom freeing logic, and so it is only really used when freeing a wrapped object in a custom structure (mainly to release any of its heap-based allocations). Standard object destruction (via the [`zend_object_std_dtor`](https://phpinternals.net/docs/zend_object_std_dtor) function) will still need to be performed on the `obj` member.
+
+For example, destroying the `obj` member of the following will also need the `str` member to be freed too:
+```c
+typedef struct _custom_obj_t {
+    char *str;
+    zend_object obj;
+} custom_obj_t;
+```
+
+So a handler may look as follows:
+```c
+void custom_object_free(zend_object *zobj)
+{
+    custom_obj_t *cobj = zobj - zobj->handlers->offset;
+
+    efree(cobj->str);
+    zend_object_std_dtor(zobj);
+}
+```
+
+### get_debug_info
+
+This is used when either `var_dump` or `debug_zval_dump` has been used upon the object. The default handler will invoke the `__debugInfo` magic method of the object if it exists, or will fallback to the `get_properties` handler. If `get_debug_info` has simply been set to `NULL`, then it will also fallback to the `get_properties` handler. The default handler for this is `zend_std_get_debug_info`, which has the following signature:
+```c
+HashTable *zend_std_get_debug_info(zval *object, int *is_temp);
+```
+
+The `is_temp` parameter should be set to `1` if a temporary [`HashTable`](https://phpinternals.net/docs/hashtable) is used for the return value. This is because it will need to be subsequently freed once it has been finished with in order to prevent memory leaks.

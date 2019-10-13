@@ -1,0 +1,30 @@
+[[[id]]]
+93775058
+
+[[[name]]]
+zend_reference
+
+[[[url]]]
+zend_reference
+
+[[[type]]]
+type
+
+[[[declaration]]]
+typedef struct _zend_reference zend_reference;
+
+[[[parameters]]]
+
+[[[definition]]]
+struct _zend_reference {
+	zend_refcounted_h gc;
+	zval              val;
+};
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/9dada7b291d3fb88a81406cafa5d6fbcb1ee11f0/Zend/zend_types.h#L351
+
+[[[description]]]
+This (`zval` value) type is effectively a wrapper that holds a referenced value (see [`IS_REFERENCE`](http://phpinternals.net/docs/is_reference)). This causes references in PHP to incur an extra level of indirection when wanting to access their value (causing them to be slightly slower than unreferenced values).
+
+[[[additional_information]]]

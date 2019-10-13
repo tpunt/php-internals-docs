@@ -1,0 +1,42 @@
+[[[id]]]
+66160389
+
+[[[name]]]
+pecalloc
+
+[[[url]]]
+pecalloc
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define pecalloc(nmemb, size, persistent) ((persistent)?__zend_calloc((nmemb), (size)):ecalloc((nmemb), (size)))
+
+[[[parameters]]]
+nmemb
+The multiplier of `size`
+
+size
+The amount of memory (in bytes) to allocate, multiplied by `nmemb`
+
+persistent
+Whether the allocation should be [persistent](https://phpinternals.net/categories/zend_memory_manager#persistent-vs-non-persistent-allocations)
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/bb217f781a34a06bf682885b5f8e000a319d01a0/Zend/zend_alloc.h#L199
+
+[[[description]]]
+Allocates the requested amount of bytes as (optionally) [persistent memory](https://phpinternals.net/categories/zend_memory_manager#persistent-vs-non-persistent-allocations) by the [ZMM](https://phpinternals.net/categories/zend_memory_manager), where the allocated memory is cleared (set to `0`).
+
+[[[additional_information]]]
+For example:
+```c
+zval *z = pecalloc(sizeof(zval), 1);
+
+// ...
+
+pefree(z, 1);
+```

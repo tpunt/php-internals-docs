@@ -1,0 +1,21 @@
+[[[name]]]
+Globals
+
+[[[url]]]
+globals
+
+[[[subcategories]]]
+
+[[[supercategories]]]
+
+[[[articles]]]
+
+[[[symbols]]]
+10127797
+31237227
+85949410
+
+[[[body]]]
+There are a number of global variables that are used internally at various stages throughout the PHP interpreter. These globals are wrapped in accessor macros, because how they are accessed will be dependent upon whether the [TSRM](https://phpinternals.net/categories/thread_safe_resource_manager) is enabled.
+
+Typically, the globals are used to hold data about the current context. For example, the lexing phase has the `LANG_SCNG` macro, the compilation phase has the [`CG`](https://phpinternals.net/docs/cg) macro, the execution phase has the `EG` and [`EX`](https://phpinternals.net/docs/ex) macros, and so on.

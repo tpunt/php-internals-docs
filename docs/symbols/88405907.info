@@ -1,0 +1,86 @@
+[[[id]]]
+88405907
+
+[[[name]]]
+gc_collect_cycles
+
+[[[url]]]
+gc_collect_cycles
+
+[[[type]]]
+variable
+
+[[[declaration]]]
+ZEND_API int (*gc_collect_cycles)(void);
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/9d5ecf683805f60142406ba980efb12bb6275855/Zend/zend_gc.c#L90
+
+[[[description]]]
+This hook provides a way to inspect the [cycle collector](https://phpinternals.net/categories/garbage_collector#the-mark-and-sweep-cycle-collector), enabling for runtime statistics of it to be attained. It should be set in the [request cycle](https://phpinternals.net/categories/extensions#phps-lifecycle) of an extension and will be triggered either manually with a call to the `gc_collect_cycles` PHP function, or automatically when either the GC root buffer has become full or on engine shutdown. The default function for this hook is `zend_gc_collect_cycles`.
+
+The function pointer returns the number of roots that were collected.
+
+[[[additional_information]]]
+For example, let's collect some basic stats of the cycle collector:
+```c
+PHP_RINIT_FUNCTION(ext_name)
+{
+	gc_collect_cycles = gc_stats_collector;
+
+	return SUCCESS;
+}
+
+int gc_stats_collector(void)
+{
+	int collected_count;
+	float time_take;
+	time_t start, end;
+
+	start = clock();
+	collected_count = zend_gc_collect_cycles();
+	end = clock();
+
+	printf("Run: %d\n", GC_G(gc_runs));
+	printf("    Last Collected: %d (total collected: %d)\n", collected_count, GC_G(collected));
+	printf("    Time taken: %fs\n", (double)(end-start)/CLOCKS_PER_SEC);
+
+	return collected_count;
+}
+```
+
+The following script:
+```php
+<?php
+
+for ($i = 0; $i < 30; ++$i) {
+	for ($j = 0; $j < 400; ++$j) {
+		$obj1 = new StdClass();
+		$obj2 = new StdClass();
+		$obj1->a = $obj2;
+		$obj2->a = $obj1;
+	}
+}
+```
+
+Will output:
+```
+Run: 1
+    Last Collected: 10000 (total collected: 10000)
+    Time taken: 0.006056s
+Run: 2
+    Last Collected: 10000 (total collected: 20000)
+    Time taken: 0.007131s
+Run: 3
+    Last Collected: 3998 (total collected: 23998)
+    Time taken: 0.002000s
+Run: 3
+    Last Collected: 0 (total collected: 23998)
+    Time taken: 0.000002s
+```
+
+The run that occurs on engine shutdown does not increment the run count of the cycle collector, which is why it looks like we have a duplicate third run.

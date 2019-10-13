@@ -1,0 +1,82 @@
+[[[id]]]
+91324659
+
+[[[name]]]
+Z_PARAM_STRICT_LONG
+
+[[[url]]]
+z_param_strict_long
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define Z_PARAM_STRICT_LONG(dest) Z_PARAM_STRICT_LONG_EX(dest, _dummy, 0, 0)
+
+[[[parameters]]]
+dest
+A [`zend_long`](https://phpinternals.net/docs/zend_long) to store the parameter in
+
+[[[definition]]]
+#define Z_PARAM_STRICT_LONG_EX(dest, is_null, check_null, separate) \
+	Z_PARAM_STRICT_LONG_EX2(dest, is_null, check_null, separate, separate)
+
+#define Z_PARAM_STRICT_LONG_EX2(dest, is_null, check_null, deref, separate) \
+		Z_PARAM_PROLOGUE(deref, separate); \
+		if (UNEXPECTED(!zend_parse_arg_long(_arg, &dest, &is_null, check_null, 1))) { \
+			_expected_type = Z_EXPECTED_LONG; \
+			error_code = ZPP_ERROR_WRONG_ARG; \
+			break; \
+		}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/ebb339625d9b1335a1dcb7ab355d27d999f7413b/Zend/zend_API.h#L961
+
+[[[description]]]
+Specify a parameter that should parsed as an integer. If the argument is a float that is out of the bounds of an integer in PHP, then it will still be parsed into an integer. `PHP_INT_MIN` is used for any float less than this integer, `PHP_INT_MAX` is used for any float greater than this integer, and `0` is used for +/- `INF`.
+
+See also [`Z_PARAM_LONG`](https://phpinternals.net/docs/z_param_long), which will reject floating-point values outside of the integer range.
+
+[[[additional_information]]]
+For example, let's create a function that simply outputs the argument passed in as an integer:
+```c
+/* argument information */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_output_int, 0, 0, 1)
+	ZEND_ARG_INFO(0, arg)
+ZEND_END_ARG_INFO()
+
+/* void output_int(int $arg) */
+PHP_FUNCTION(output_int)
+{
+	zend_long arg;
+
+	// new API
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRICT_LONG(arg)
+	ZEND_PARSE_PARAMETERS_END();
+
+	/* old API
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "L", &arg) == FAILURE) {
+		return;
+	}
+	*/
+
+	php_printf("int(" ZEND_LONG_FMT ")\n", arg);
+}
+```
+
+Usage:
+```php
+output_int(PHP_INT_MIN - 1);
+output_int(PHP_INT_MAX + 1);
+output_int(-INF);
+output_int(INF);
+```
+
+Outputs:
+```
+int(-9223372036854775808)
+int(9223372036854775807)
+int(0)
+int(0)
+```

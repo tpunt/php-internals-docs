@@ -1,0 +1,37 @@
+[[[id]]]
+69743203
+
+[[[name]]]
+GC_FLAGS
+
+[[[url]]]
+gc_flags
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define GC_FLAGS(p) (p)->gc.u.v.flags
+
+[[[parameters]]]
+p
+A pointer to a garbage-collected type to access its garbage flags
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/272a9f29f5cba3050132e68f7303820743982822/Zend/zend_types.h#L439
+
+[[[description]]]
+Fetches the flags of the garbage-collected type.
+
+This macro is used on any type that holds [garbage collection](https://phpinternals.net/categories/garbage_collector) information directly, such as the [`zend_string`](https://phpinternals.net/docs/zend_string), [`HashTable`](https://phpinternals.net/docs/hashtable), and [`zend_refcounted`](https://phpinternals.net/docs/zend_refcounted) types.
+
+[[[additional_information]]]
+For example:
+```c
+zend_bool isArrayImmutable(HashTable *array)
+{
+    return !!(GC_FLAGS(array) & IS_ARRAY_IMMUTABLE);
+}
+```

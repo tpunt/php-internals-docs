@@ -1,0 +1,26 @@
+[[[name]]]
+Hooking API
+
+[[[url]]]
+hooking_api
+
+[[[subcategories]]]
+
+[[[supercategories]]]
+
+[[[articles]]]
+
+[[[symbols]]]
+49143193
+88405907
+13828192
+59594599
+
+[[[body]]]
+There are many ways to hook into the internal functionality of the Zend Engine. This is mostly done by redefining  the various pointer functions that have been exposed, but can also involve setting hooks through particular functions.
+
+Some of the hooks exposed are shown below:
+ - [`zend_set_user_opcode_handler`](https://phpinternals.net/docs/zend_set_user_opcode_handler) - opcode hooking
+ - [`zend_ast_process`](https://phpinternals.net/docs/zend_ast_process) - AST hooking
+ - [`gc_collect_cycles`](https://phpinternals.net/docs/gc_collect_cycles) - [Cyclic garbage collector](https://phpinternals.net/categories/garbage_collector#the-mark-and-sweep-cycle-collector) hooking
+ - [`zend_throw_exception_hook`](https://phpinternals.net/docs/zend_throw_exception_hook) - exception hooking

@@ -1,0 +1,52 @@
+[[[id]]]
+37432878
+
+[[[name]]]
+STD_ZEND_INI_ENTRY
+
+[[[url]]]
+std_zend_ini_entry
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define STD_ZEND_INI_ENTRY(name, default_value, modifiable, on_modify, property_name, struct_type, struct_ptr)
+
+[[[parameters]]]
+name
+The name of the new setting (typically prefixed by the extension name)
+
+default_value
+The default value for the new setting (this should always be a string)
+
+modifiable
+Constraints on when this ini setting can be modified (this can be either `PHP_INI_ALL`, `PHP_INI_SYSTEM`, `PHP_INI_PERDIR`, or `PHP_INI_USER`)
+
+on_modify
+The callback to execute when updating this ini setting. This can any predefined (or custom defined) modifier handler (see [the advanced section](https://phpinternals.net/categories/extensions#the-advanced) of using ini settings in an extension).
+
+property_name
+The member name from the extension's Zend globals structure that will store this ini value in
+
+struct_type
+The extension's specific Zend globals structure
+
+struct_ptr
+The pointer  to the extension's Zend globals structure
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/dce52dd963824c693cd44ed07c7e7fca1b611c5f/Zend/zend_ini.h#L126
+
+[[[description]]]
+This is used to create new ini settings. It should only directly be used by the Zend Engine (i.e. for the `zend.assertions` ini setting). Extension should use the [`STD_PHP_INI_ENTRY`](https://phpinternals.net/docs/std_php_ini_entry) macro instead.
+
+[[[additional_information]]]
+For example:
+```c
+ZEND_INI_BEGIN()
+	STD_ZEND_INI_ENTRY("zend.assertions", "1", ZEND_INI_ALL, OnUpdateAssertions, assertions, zend_executor_globals, executor_globals)
+ZEND_INI_END()
+```

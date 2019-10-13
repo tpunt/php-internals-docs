@@ -1,0 +1,28 @@
+[[[id]]]
+65989860
+
+[[[name]]]
+RETVAL_INTERNED_STR
+
+[[[url]]]
+retval_interned_str
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define RETVAL_INTERNED_STR(s) ZVAL_INTERNED_STR(return_value, s)
+
+[[[parameters]]]
+s
+The interned [Zend string](https://phpinternals.net/categories/zend_strings) value being set
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/9ae9533b90403fdf26596cd105ef7f85e0ce86ed/Zend/zend_API.h#L640
+
+[[[description]]]
+A shorthand macro to set the return value (typically from inside [`ZEND_FUNCTION`](https://phpinternals.net/docs/zend_function) or [`ZEND_METHOD`](https://phpinternals.net/docs/zend_method)) to the specified interned string value.
+
+[[[additional_information]]]

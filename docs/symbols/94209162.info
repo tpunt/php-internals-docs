@@ -1,0 +1,33 @@
+[[[id]]]
+94209162
+
+[[[name]]]
+HASH_FLAG_INITIALIZED
+
+[[[url]]]
+hash_flag_initialized
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define HASH_FLAG_INITIALIZED (1<<3)
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/f18a00b8ce30d9f3f96090c63d575b5d3557d9b5/Zend/zend_hash.h#L41
+
+[[[description]]]
+This flag denotes a fully initialised [`HashTable`](https://phpinternals.net/docs/hashtable) (including having allocated its buckets). It is used to ensure that a hash table is initialised before use, as well as to prevent accidental double initialisation of a hash table (which would cause memory to leak and lost data).
+
+[[[additional_information]]]
+For example:
+```c
+zend_bool is_init(HashTable *ht)
+{
+    return !!(ht->u.flags & HASH_FLAG_INITIALIZED);
+}
+```

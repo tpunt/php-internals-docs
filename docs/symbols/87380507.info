@@ -1,0 +1,60 @@
+[[[id]]]
+87380507
+
+[[[name]]]
+zend_class_implements
+
+[[[url]]]
+zend_class_implements
+
+[[[type]]]
+function
+
+[[[declaration]]]
+ZEND_API void zend_class_implements(zend_class_entry *class_entry, int num_interfaces, ...);
+
+[[[parameters]]]
+class_entry
+The class entry implementing the given interfaces
+
+num_interfaces
+The number of interfaces to implement
+
+...
+This should contain a list of interfaces (`zend_class_entry *` types) according to the interface count specified by `num_interfaces`
+
+[[[definition]]]
+ZEND_API void zend_class_implements(zend_class_entry *class_entry, int num_interfaces, ...)
+{
+	zend_class_entry *interface_entry;
+	va_list interface_list;
+	va_start(interface_list, num_interfaces);
+
+	while (num_interfaces--) {
+		interface_entry = va_arg(interface_list, zend_class_entry *);
+		zend_do_implement_interface(class_entry, interface_entry);
+	}
+
+	va_end(interface_list);
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/dd0ebc02dc5942559887975c05cdd6d38f4151ce/Zend/zend_API.c#L2678
+
+[[[description]]]
+Implements one or more interfaces for a given class entry.
+
+[[[additional_information]]]
+For example:
+```c
+PHP_MINIT_FUNCTION(ext_name)
+{
+    zend_class_entry ce;
+
+    INIT_CLASS_ENTRY(ce, "NewClass", NewClass_methods);
+
+    NewClass_ce = zend_register_internal_class(&ce);
+
+    zend_class_implements(NewClass_ce, 1, SomeInterface_ce); // line of interest
+}
+```

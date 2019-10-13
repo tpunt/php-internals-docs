@@ -1,0 +1,30 @@
+[[[id]]]
+92431168
+
+[[[name]]]
+Z_COPYABLE
+
+[[[url]]]
+z_copyable
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define Z_COPYABLE(zval) ((Z_TYPE_FLAGS(zval) & IS_TYPE_COPYABLE) != 0)
+
+[[[parameters]]]
+zval
+The zval to check if its value is copyable
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/ace9fe53173974ec63f9e0357a6e8372ff5adb3b/Zend/zend_types.h#L535
+
+[[[description]]]
+This macro checks to see if the value of the given zval is copyable when performing a duplication (a hard copy). See the [`IS_TYPE_COPYABLE`](http://phpinternals.net/docs/is_type_copyable) macro for further information on what values are copyable in the Zend Engine.
+
+This macro also has a counterpart macro, `Z_COPYABLE_P`, that accepts a pointer to a zval instead.
+
+[[[additional_information]]]

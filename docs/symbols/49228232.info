@@ -1,0 +1,28 @@
+[[[id]]]
+49228232
+
+[[[name]]]
+GC_COLLECTABLE
+
+[[[url]]]
+gc_collectable
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define GC_COLLECTABLE (1<<7)
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/40ecad34022b6e687cc654d47c88f8cef5d418fd/Zend/zend_types.h#L459
+
+[[[description]]]
+The collectable type applies to (mutable) arrays and objects only. It groups both of these types together since they may contain cyclic references to themselves, requiring them to be put into the GC root buffer to prevent self-referencing memory leaks (see the [Mark and Sweep Cycle Collector](https://phpinternals.net/categories/garbage_collector#the-mark-and-sweep-cycle-collector)).
+
+The [`GC_MAY_LEAK`](https://phpinternals.net/docs/gc_may_leak) macro should be used to check if a type may contain cyclic references.
+
+[[[additional_information]]]

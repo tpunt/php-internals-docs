@@ -1,0 +1,46 @@
+[[[id]]]
+52289974
+
+[[[name]]]
+ZEND_ARG_ARRAY_INFO
+
+[[[url]]]
+zend_arg_array_info
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZEND_ARG_ARRAY_INFO(pass_by_ref, name, allow_null)
+
+[[[parameters]]]
+pass_by_ref
+whether the argument passed by reference or value
+
+name
+argument name
+
+allow_null
+may the argument be null (as `?array`)
+
+[[[definition]]]
+#define ZEND_ARG_ARRAY_INFO(pass_by_ref, name, allow_null) \
+    { #name, ZEND_TYPE_ENCODE(IS_ARRAY, allow_null), pass_by_ref, 0 },
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/378aeb86854a0e244b2f1528694b595660b7d533/Zend/zend_API.h#L100
+
+[[[description]]]
+Argument information for built-in functions is important for the sake of the reflection API.
+
+The `ZEND_ARG_ARRAY_INFO` macro is used to specify the argument is an array.
+
+[[[additional_information]]]
+This macro only exists because it predates `ZEND_ARG_TYPE_INFO`, which can also be used to specify the argument is an array.
+
+### Example
+
+    ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_walk, 0, 2, _IS_BOOL, 0)
+        ZEND_ARG_ARRAY_INFO(1, array, 0) // passed by reference
+        ZEND_ARG_CALLABLE_INFO(0, callback, 0)
+    ZEND_END_ARG_INFO()

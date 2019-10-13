@@ -1,0 +1,28 @@
+[[[id]]]
+29593350
+
+[[[name]]]
+RETVAL_STR
+
+[[[url]]]
+retval_str
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define RETVAL_STR(s) ZVAL_STR(return_value, s)
+
+[[[parameters]]]
+s
+The [Zend string](https://phpinternals.net/categories/zend_strings) value being set
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/9ae9533b90403fdf26596cd105ef7f85e0ce86ed/Zend/zend_API.h#L639
+
+[[[description]]]
+A shorthand macro to set the return value (typically from inside [`ZEND_FUNCTION`](https://phpinternals.net/docs/zend_function) or [`ZEND_METHOD`](https://phpinternals.net/docs/zend_method)) to the specified string value.
+
+[[[additional_information]]]

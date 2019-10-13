@@ -1,0 +1,89 @@
+[[[id]]]
+31237227
+
+[[[name]]]
+zend_compiler_globals
+
+[[[url]]]
+zend_compiler_globals
+
+[[[type]]]
+type
+
+[[[declaration]]]
+typedef struct _zend_compiler_globals zend_compiler_globals;
+
+[[[parameters]]]
+
+[[[definition]]]
+struct _zend_compiler_globals {
+	zend_stack loop_var_stack;
+
+	zend_class_entry *active_class_entry;
+
+	zend_string *compiled_filename;
+
+	int zend_lineno;
+
+	zend_op_array *active_op_array;
+
+	HashTable *function_table;	/* function symbol table */
+	HashTable *class_table;		/* class table */
+
+	HashTable filenames_table;
+
+	HashTable *auto_globals;
+
+	zend_bool parse_error;
+	zend_bool in_compilation;
+	zend_bool short_tags;
+
+	zend_bool unclean_shutdown;
+
+	zend_bool ini_parser_unbuffered_errors;
+
+	zend_llist open_files;
+
+	struct _zend_ini_parser_param *ini_parser_param;
+
+	uint32_t start_lineno;
+	zend_bool increment_lineno;
+
+	zend_string *doc_comment;
+	uint32_t extra_fn_flags;
+
+	uint32_t compiler_options; /* set of ZEND_COMPILE_* constants */
+
+	zend_oparray_context context;
+	zend_file_context file_context;
+
+	zend_arena *arena;
+
+	HashTable interned_strings;
+
+	const zend_encoding **script_encoding_list;
+	size_t script_encoding_list_size;
+	zend_bool multibyte;
+	zend_bool detect_unicode;
+	zend_bool encoding_declared;
+
+	zend_ast *ast;
+	zend_arena *ast_arena;
+
+	zend_stack delayed_oplines_stack;
+
+#ifdef ZTS
+	zval **static_members_table;
+	int last_static_member;
+#endif
+};
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/04fe5e968334913ab9d7f23df84d09c543b3a767/Zend/zend_globals.h#L70
+
+[[[description]]]
+This structure contains all of the necessary contextual data during the compilation stage. It is accessed via the [`CG`](https://phpinternals.net/docs/cg) accessor macro.
+
+For example, the name of the file currently being compiled will be stored in this structure, so that whenever the compiler finds an `__FILE__` constant, it can replace it with the current file name.
+
+[[[additional_information]]]

@@ -1,0 +1,26 @@
+[[[id]]]
+99021134
+
+[[[name]]]
+zend_bool
+
+[[[url]]]
+zend_bool
+
+[[[type]]]
+type
+
+[[[declaration]]]
+typedef unsigned char zend_bool;
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/9ae9533b90403fdf26596cd105ef7f85e0ce86ed/Zend/zend_types.h#L46
+
+[[[description]]]
+This type is used to store boolean values in PHP.
+
+[[[additional_information]]]

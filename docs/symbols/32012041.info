@@ -1,0 +1,37 @@
+[[[id]]]
+32012041
+
+[[[name]]]
+zend_stack_int_top
+
+[[[url]]]
+zend_stack_int_top
+
+[[[type]]]
+function
+
+[[[declaration]]]
+ZEND_API int zend_stack_int_top(const zend_stack *stack);
+
+[[[parameters]]]
+stack
+The stack to return the top of
+
+[[[definition]]]
+ZEND_API int zend_stack_int_top(const zend_stack *stack)
+{
+	int *e = zend_stack_top(stack);
+	if (e) {
+		return *e;
+	} else {
+		return FAILURE;
+	}
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/ec2823fb8c090c0d71f231c18a609d28b5b7b240/Zend/zend_stack.c#L65
+
+[[[description]]]
+A shorthand function for retrieving the top element of a stack of integers.
+
+[[[additional_information]]]

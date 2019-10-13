@@ -1,0 +1,77 @@
+[[[id]]]
+62456634
+
+[[[name]]]
+Z_PARAM_ZVAL_DEREF
+
+[[[url]]]
+z_param_zval_deref
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define Z_PARAM_ZVAL_DEREF(dest) Z_PARAM_ZVAL_DEREF_EX(dest, 0, 0)
+
+[[[parameters]]]
+dest
+A [`zval *`](https://phpinternals.net/docs/zval) to store the parameter in
+
+[[[definition]]]
+/* Definition of Z_PARAM_ZVAL_DEREF_EX */
+#define Z_PARAM_ZVAL_DEREF_EX(dest, check_null, separate) \
+		Z_PARAM_PROLOGUE(1, separate); \
+		zend_parse_arg_zval_deref(_arg, &dest, check_null);
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/9c2a1f52a5f087c70a9e91dc1f43e5718d1bd8b6/Zend/zend_API.h#L1085
+
+[[[description]]]
+Specify a generic parameter. This should only be used for when a parameter needs to be passed by reference, where it is just a shorthand version of [`Z_PARAM_ZVAL`](https://phpinternals.net/docs/z_param_zval) and [`ZVAL_DEREF`](https://phpinternals.net/docs/zval_deref). This is because passing by value automatically dereferences the argument - whereas passing by reference requires manual dereferencing.
+
+[[[additional_information]]]
+For example, let's create a function called `forty_two` that accepts a by-reference parameter (which can be anything), that changes its value to `int(42)`:
+```c
+/* argument information */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_forty_two, 0, 0, 1)
+	ZEND_ARG_INFO(1, arg) // pass by reference
+ZEND_END_ARG_INFO()
+
+/* void forty_two(mixed &$param); */
+PHP_FUNCTION(forty_two)
+{
+	zval *arg;
+
+	// new API
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL_DEREF(arg)
+	ZEND_PARSE_PARAMETERS_END();
+
+	/* old API
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/", &arg) != SUCCESS) {
+	    return;
+	}
+	*/
+
+	zval_ptr_dtor(arg);
+
+	ZVAL_LONG(arg, 42);
+}
+```
+
+The [`zval_ptr_dtor`](https://phpinternals.net/docs/zval_ptr_dtor) call is required on the argument being passed by reference if the value is simply going to be overwritten (to free the value first). `zval_ptr_dtor` should be favoured over [`zval_dtor`](https://phpinternals.net/docs/zval_dtor) here because if the argument was previously a self-referencing collectable (see [`GC_COLLECTABLE`](https://phpinternals.net/docs/gc_collectable)), then it needs to be free'd properly (otherwise there will be leaks).
+
+Usage:
+```php
+$a = new StdClass();
+$a->b = $a; // demonstrate the need for `zval_ptr_dtor`
+
+forty_two($a);
+
+var_dump($a);
+```
+
+Output:
+```
+int(42)
+```

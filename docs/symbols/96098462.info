@@ -1,0 +1,29 @@
+[[[id]]]
+96098462
+
+[[[name]]]
+Z_LVAL
+
+[[[url]]]
+z_lval
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define Z_LVAL(zval) (zval).value.lval
+
+[[[parameters]]]
+zval
+The zval to fetch the long value from
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/9dada7b291d3fb88a81406cafa5d6fbcb1ee11f0/Zend/zend_types.h#L572
+
+[[[description]]]
+Fetches the long value from the given zval (see the [`IS_LONG`](http://phpinternals.net/docs/is_long) type).
+
+[[[additional_information]]]
+This macro also has a counterpart macro, `Z_LVAL_P`, that accepts a pointer to a zval instead.

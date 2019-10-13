@@ -1,0 +1,50 @@
+[[[id]]]
+67002470
+
+[[[name]]]
+zend_hash_str_add_ptr
+
+[[[url]]]
+zend_hash_str_add_ptr
+
+[[[type]]]
+function
+
+[[[declaration]]]
+static zend_always_inline void *zend_hash_str_add_ptr(HashTable *ht, const char *str, size_t len, void *pData)
+
+[[[parameters]]]
+ht
+The hash table to insert into
+
+str
+The lookup key
+
+len
+The lookup key length
+
+pData
+The arbitrary value being inserted
+
+[[[definition]]]
+static zend_always_inline void *zend_hash_str_add_ptr(HashTable *ht, const char *str, size_t len, void *pData)
+{
+	zval tmp, *zv;
+
+	ZVAL_PTR(&tmp, pData);
+	zv = zend_hash_str_add(ht, str, len, &tmp);
+	if (zv) {
+		ZEND_ASSUME(Z_PTR_P(zv));
+		return Z_PTR_P(zv);
+	} else {
+		return NULL;
+	}
+}
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/c8efaea1e3f93b5b836a38c6985b67983b1dc95a/Zend/zend_hash.h#L555
+
+[[[description]]]
+This is the C string variant of [`zend_hash_add_ptr`](https://phpinternals.net/docs/zend_hash_add_ptr).
+
+[[[additional_information]]]

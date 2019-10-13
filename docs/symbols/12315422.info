@@ -1,0 +1,26 @@
+[[[id]]]
+12315422
+
+[[[name]]]
+ZEND_FETCH_CLASS_NO_AUTOLOAD
+
+[[[url]]]
+zend_fetch_class_no_autoload
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define ZEND_FETCH_CLASS_NO_AUTOLOAD 0x80
+
+[[[parameters]]]
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/ad25d67d733ae956145b5001184f25888b24eacb/Zend/zend_compile.h#L846
+
+[[[description]]]
+This [Zend Class](https://phpinternals.net/categories/zend_classes) fetching flag is used to prevent autoloading from occurring when an unrecognised class name has been encountered. It is used in places such as argument type checking for function calls, where there is no need to autoload the class specified as the parameter type (because if the class has not yet been loaded, then the argument being passed in cannot possibly be of the correct type).
+
+[[[additional_information]]]

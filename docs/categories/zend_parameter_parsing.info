@@ -1,0 +1,258 @@
+[[[name]]]
+Zend Parameter Parsing
+
+[[[url]]]
+zend_parameter_parsing
+
+[[[subcategories]]]
+
+[[[supercategories]]]
+
+[[[articles]]]
+
+[[[symbols]]]
+90672366
+85620052
+26736591
+21328604
+90657246
+52289974
+18520175
+38202229
+81052516
+31774140
+75269216
+2345821
+52855439
+15574540
+46327515
+55161488
+79017288
+40661319
+95591298
+61861095
+53779466
+57120587
+23514337
+61971553
+3677572
+12935005
+91324659
+19135628
+26707870
+9134155
+44348541
+65489818
+48969674
+9846430
+76475867
+5710221
+62456634
+99197845
+86981135
+26514199
+5159069
+
+[[[body]]]
+The Zend Parameter Parsing (ZPP) API is used by all internal functions. It comes in two flavours: the old, string-based API, and the new, more performant, macro-based API introduced into PHP 7.
+
+The following table shows the old API and new API for declaring the parameter definitions:
+Old API | New API
+---------- | ----------
+[`zend_parse_parameters`](https://phpinternals.net/docs/zend_parse_parameters) | [`ZEND_PARSE_PARAMETERS_START`](https://phpinternals.net/docs/zend_parse_parameters_start)
+[`zend_parse_parameters_ex`](https://phpinternals.net/docs/zend_parse_parameters_ex) | [`ZEND_PARSE_PARAMETERS_START_EX`](https://phpinternals.net/docs/zend_parse_parameters_start_ex)
+[`zend_parse_parameters_throw`](https://phpinternals.net/docs/zend_parse_parameters_throw) | [`ZEND_PARSE_PARAMETERS_START_EX`](https://phpinternals.net/docs/zend_parse_parameters_start_ex)
+Not needed | `ZEND_PARSE_PARAMETERS_END`
+Not needed | `ZEND_PARSE_PARAMETERS_END_EX`
+`zend_parse_parameters_none` | [`ZEND_PARSE_PARAMETERS_NONE`](https://phpinternals.net/docs/zend_parse_parameters_none)
+
+Valid extended parameter parsing flags:
+ - [`ZEND_PARSE_PARAMS_QUIET`](https://phpinternals.net/docs/zend_parse_params_quiet) - suppress parameter parsing errors
+ - [`ZEND_PARSE_PARAMS_THROW`](https://phpinternals.net/docs/zend_parse_params_throw) - throw a `TypeError` on parameter parsing errors
+
+The following two tables show the old API and new API with respect to typing and modifier semantics:
+Expecting Type | Old API | New API
+---------- | ----------- | ----------
+Array | `a` | [`Z_PARAM_ARRAY(zval *)`](https://phpinternals.net/docs/z_param_array)
+Array  | `h` | [`Z_PARAM_ARRAY_HT(HashTable *)`](https://phpinternals.net/docs/z_param_array_ht)
+Array or object | `A` | [`Z_PARAM_ARRAY_OR_OBJECT(zval * )`](https://phpinternals.net/docs/z_param_array_or_object)
+Array or object | `H` | [`Z_PARAM_ARRAY_OR_OBJECT_HT(HashTable *)`](https://phpinternals.net/docs/z_param_array_or_object_ht)
+Boolean | `b` | [`Z_PARAM_BOOL(zend_bool)`](https://phpinternals.net/docs/z_param_bool)
+Callable | `f` | [`Z_PARAM_FUNC(zend_fcall_info, zend_fcall_info_cache)`](https://phpinternals.net/docs/z_param_func)
+Float | `d` | [`Z_PARAM_DOUBLE(double)`](https://phpinternals.net/docs/z_param_double)
+Integer | `l` | [`Z_PARAM_LONG(zend_long)`](https://phpinternals.net/docs/z_param_long)
+Integer | `L` | [`Z_PARAM_STRICT_LONG(zend_long)`](https://phpinternals.net/docs/z_param_strict_long)
+Mixed | `z` | [`Z_PARAM_ZVAL(zval *)`](https://phpinternals.net/docs/z_param_zval)
+Mixed | N/a | [`Z_PARAM_ZVAL_DEREF(zval *)`](https://phpinternals.net/docs/z_param_zval_deref) **†**
+Object  | `o` | [`Z_PARAM_OBJECT(zval *)`](https://phpinternals.net/docs/z_param_object)
+Object  | `O` | [`Z_PARAM_OBJECT_OF_CLASS(zval *, zend_class_entry *)`](https://phpinternals.net/docs/z_param_object_of_class)
+Resource | `r` | `Z_PARAM_RESOURCE(zval *)`
+String | `s` | [`Z_PARAM_STRING(char *, size_t)`](https://phpinternals.net/docs/z_param_string)
+String | `S` | [`Z_PARAM_STR(zend_string *)`](https://phpinternals.net/docs/z_param_str)
+String (class name) | `C` | [`Z_PARAM_CLASS(zend_class_entry *)`](https://phpinternals.net/docs/z_param_class)
+String (file path) | `p` | `Z_PARAM_PATH(char *, size_t)`
+String (file path) | `P` | `Z_PARAM_PATH_STR(zend_string *)`
+
+Old API | New API | Modifier Description
+---------- | ----------- | ----------
+`\|` | [`Z_PARAM_OPTIONAL`](https://phpinternals.net/docs/z_param_optional) | Marks the point at which all subsequent parameters are optional
+`*` | [`Z_PARAM_VARIADIC('*', zval *, int)`](https://phpinternals.net/docs/z_param_variadic) | For passing 0 or more additional parameters
+`+` | [`Z_PARAM_VARIADIC('+', zval *, int)`](https://phpinternals.net/docs/z_param_variadic) | For passing 1 or more additional parameters
+`/` | Available with the [extended API](https://phpinternals.net/categories/zend_parameter_parsing#the-extended-api) | Zval separation (for argument passing by reference) **‡**
+`!` | Available with the [extended API](https://phpinternals.net/categories/zend_parameter_parsing#the-extended-api) | Allows `null` to be passed
+
+**†** Zval dereferencing (for argument passing by reference). With the old API, arguments were always dereferenced. The new API always dereferences arguments when they are passed by value, but manual dereferencing is required when passing by reference.
+
+**‡** The argument only needs to be separated if it is being passed by reference.
+
+### The Extended API
+
+All of the new ZPP API macros have extended versions (`Z_PARAM_*_EX`) for greater control over parameter parsing.
+
+If the macro's first parameter is a pointer, then two additional parameters are exposed: `check_null` and `separate`. If the macro's first parameter is not a pointer, then three additional parameters are exposed: `is_null`, `check_null`, and `separate`.
+
+E.g.
+```c
+/* Declaration of Z_PARAM_OBJECT_EX */
+#define Z_PARAM_OBJECT_EX(dest, check_null, separate) \ // dest is a pointer
+	Z_PARAM_OBJECT_EX2(dest, check_null, separate, separate)
+
+/*Declaration of Z_PARAM_DOUBLE_EX */
+#define Z_PARAM_DOUBLE_EX(dest, is_null, check_null, separate) \ // dest is not a pointer
+	Z_PARAM_DOUBLE_EX2(dest, is_null, check_null, separate, separate)
+```
+
+The `check_null` flag (which is off by default) is used to reject passing a PHP `null` as the argument, where it will either set the macro's first parameter to `NULL` if it is a pointer, or set the `is_null` flag if it is not a pointer.
+
+The `separate` flag (which is also off by default) is used to separate the zval being passed in if its reference count is greater than `1`. This is only really needed when passing by reference is being used.
+
+The extended API also has `Z_PARAM_*_EX2` macros. For example:
+```c
+#define Z_PARAM_DOUBLE_EX2(dest, is_null, check_null, deref, separate) \
+		Z_PARAM_PROLOGUE(deref, separate); \
+		if (UNEXPECTED(!zend_parse_arg_double(_arg, &dest, &is_null, check_null))) { \
+			_expected_type = Z_EXPECTED_DOUBLE; \
+			error_code = ZPP_ERROR_WRONG_ARG; \
+			break; \
+		}
+```
+
+The additional parameter (`deref`) gives the ability to dereference the argument being passed in (this is off by default, or whatever the value of `separate` is). This is only needed when passing arguments by reference. See Example 1 for further information on this.
+
+## Specifying Argument Information
+
+Argument information for built-in functions is important for the sake of the reflection API. It enables for various pieces of information of an internal function to be introspected at runtime, including:
+ - the required argument count
+ - the type of return
+ - whether the return is by-reference
+ - whether the return type is nullable
+ - the type of an argument
+ - whether the argument is by-reference
+ - whether the argument type is nullable
+
+The following table shows the argument declaration macros:
+Macro | Description
+-------- | ----------
+`ZEND_BEGIN_ARG_INFO` | ...
+`ZEND_BEGIN_ARG_INFO_EX` | ...
+`ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO` | ...
+`ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX` | ...
+`ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO` | ...
+`ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX` | ...
+`ZEND_END_ARG_INFO` | ...
+
+The following table shows the argument information macros:
+Macro | Description
+-------- | ----------
+`ZEND_ARG_INFO` | ...
+`ZEND_ARG_PASS_INFO` | ...
+`ZEND_ARG_OBJ_INFO` | ...
+`ZEND_ARG_ARRAY_INFO` | ...
+`ZEND_ARG_CALLABLE_INFO` | ...
+`ZEND_ARG_TYPE_INFO` | ...
+`ZEND_ARG_VARIADIC_INFO` | ...
+`ZEND_ARG_VARIADIC_TYPE_INFO` | ...
+`ZEND_ARG_VARIADIC_OBJ_INFO` | ...
+
+## Examples
+
+### Example 1 - Passing by reference with a callback
+
+Let's create a non-variadic, pass-by-reference version of `array_map` called `array_map2`:
+```c
+/* argument information */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_map2, 0, 0, 2)
+	ZEND_ARG_INFO(0, cb)
+	ZEND_ARG_INFO(1, arr) // pass by reference
+ZEND_END_ARG_INFO()
+
+/* void array_map2(callable $c, array &$a); */
+PHP_FUNCTION(array_map2)
+{
+	HashTable *arr;
+	zval *value;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+
+	// new API
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_FUNC(fci, fcc)
+		Z_PARAM_ARRAY_HT_EX(arr, 0, 1) // skip IS_NULL check, but dereference and separate it
+	ZEND_PARSE_PARAMETERS_END();
+
+	/* old API
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "fh/", &fci, &fcc, &arr) != SUCCESS) {
+		return;
+	}
+	*/
+
+	ZEND_HASH_FOREACH_VAL(arr, value) {
+		zval result; // zval to store the function call return value
+
+		fci.params = value; // the current array element
+		fci.param_count = 1;
+		fci.retval = &result;
+
+		if (zend_call_function(&fci, &fcc) != SUCCESS) {
+			return;
+		}
+
+		zval_ptr_dtor(value); // destroy the old value first
+
+		*value = result; // overwrite the old value
+	} ZEND_HASH_FOREACH_END();
+}
+```
+
+Usage:
+```php
+$obj = new StdClass();
+$obj->a = $obj; // demonstrate need for `zval_ptr_dtor`
+
+$a = [$obj];
+$b = $a; // demonstrate need for separation
+
+array_map2(function ($e) { return 1;}, $b);
+
+var_dump($a, $b);
+```
+
+Output:
+```
+array(1) {
+  [0]=>
+  object(stdClass)#1 (1) {
+    ["a"]=>
+    *RECURSION*
+  }
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+```
+
+Things to note:
+ - Dereferencing on `arr` is required because we are passing the argument by reference
+ - Separation of `arr` is required to prevent the modification of other zvals referencing this value
+ - [`zval_ptr_dtor`](https://phpinternals.net/docs/zval_ptr_dtor) is required to destroy the old value first, since it gets overwritten with a new value

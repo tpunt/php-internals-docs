@@ -1,0 +1,31 @@
+[[[id]]]
+18125640
+
+[[[name]]]
+zend_arena
+
+[[[url]]]
+zend_arena
+
+[[[type]]]
+type
+
+[[[declaration]]]
+typedef struct _zend_arena zend_arena;
+
+[[[parameters]]]
+
+[[[definition]]]
+struct _zend_arena {
+	char		*ptr;
+	char		*end;
+	zend_arena  *prev;
+};
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/c18ba686cdf2d937475eb3d5c239e4ef8e733fa6/Zend/zend_arena.h#L28
+
+[[[description]]]
+A singly-linked list of `zend_arena` structures. This offers a more optimised form of memory managed (see the [Zend Arena](http://phpinternals.net/categories/zend_arena) category for more information).
+
+[[[additional_information]]]

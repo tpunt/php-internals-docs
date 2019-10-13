@@ -1,0 +1,29 @@
+[[[id]]]
+70316271
+
+[[[name]]]
+Z_ISREF
+
+[[[url]]]
+z_isref
+
+[[[type]]]
+macro
+
+[[[declaration]]]
+#define Z_ISREF(zval) (Z_TYPE(zval) == IS_REFERENCE)
+
+[[[parameters]]]
+zval
+The [`zval`](https://phpinternals.net/docs/zval) to check whether it is a referenced type
+
+[[[definition]]]
+
+[[[source_location]]]
+https://github.com/php/php-src/blob/9dada7b291d3fb88a81406cafa5d6fbcb1ee11f0/Zend/zend_types.h#L560
+
+[[[description]]]
+This macro checks to see if the [`zval`](https://phpinternals.net/docs/zval) is a referenced type (see the [`IS_REFERENCE`](http://phpinternals.net/docs/is_reference) type).
+
+[[[additional_information]]]
+This macro also has a counterpart macro, `Z_ISREF_P`, that accepts a pointer to a zval instead.
