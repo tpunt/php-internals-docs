@@ -49,6 +49,27 @@ Amp\Loop::run(function () use ($data) {
         );
     }));
 
+    $router->addRoute('GET', '/articles/{article_url}', new CallableRequestHandler(function (Request $request) use ($data) {
+        parse_str($request->getUri()->getQuery(), $query);
+
+        $args = $request->getAttribute(Router::class);
+        $response = ArticlesService::fetchArticle($data, $args['article_url'], $query);
+
+        if ($response['code'] < 300) {
+            if (is_array($response['body'])) { // an article_url can be the name of a series
+                $response['body'] = MetaDataService::performMetaActions($response['body'], $query);
+                $response['body']['articles'] = $response['body']['default'];
+                unset($response['body']['default']);
+            }
+        }
+
+        return new Response(
+            $response['code'],
+            ['content-type' => 'application/json'],
+            json_encode($response['body'], JSON_PRETTY_PRINT)
+        );
+    }));
+
     $server = new Server($servers, $router, $logger);
 
     yield $server->start();
