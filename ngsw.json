@@ -1,0 +1,68 @@
+{
+  "configVersion": 1,
+  "timestamp": 1572215885211,
+  "index": "/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "urls": [
+        "/favicon.ico",
+        "/index.html",
+        "/main-es2015.907af1f58eca74ef4821.js",
+        "/main-es5.d8705b87fb019af5d4ab.js",
+        "/polyfills-es2015.5b2228c264a6dd9d4152.js",
+        "/polyfills-es5.2fa7354077dd36b077bc.js",
+        "/runtime-es2015.375f12bc0081c0c12b1d.js",
+        "/runtime-es5.5f071ba442a6c083b2d7.js",
+        "/styles.ada1624565e0fc382cf5.css"
+      ],
+      "patterns": []
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "urls": [
+        "/assets/logo.png",
+        "/assets/paypal.png",
+        "/assets/thumbnail.png"
+      ],
+      "patterns": []
+    }
+  ],
+  "dataGroups": [],
+  "hashTable": {
+    "/assets/logo.png": "f8a3b7080cdf9c798a7fabad9b34e2722fc3e746",
+    "/assets/paypal.png": "2f9fe6fbc0a0bd106423a19e37bac3db5ff773b0",
+    "/assets/thumbnail.png": "920cb897d1945708537ed4c1f0a99551c19a2381",
+    "/favicon.ico": "eb4e49f0ca4ec2e0ee96d3a64462a16c18a5b600",
+    "/index.html": "07d151071eca0012adbc9a32895e39880e9f6a44",
+    "/main-es2015.907af1f58eca74ef4821.js": "6b010df17fc8b5a40947fc97bc2cad505c212417",
+    "/main-es5.d8705b87fb019af5d4ab.js": "8b0a246c18c2785e7ab3f0b5749aede388e51528",
+    "/polyfills-es2015.5b2228c264a6dd9d4152.js": "4d271f198dbb0babd364a6dd80a9592ca7bcaccc",
+    "/polyfills-es5.2fa7354077dd36b077bc.js": "1eaf4e9803568015016abd6dea3a939c2fafa19b",
+    "/runtime-es2015.375f12bc0081c0c12b1d.js": "b62956c2192bfe5516d6374e753773901ed50ec5",
+    "/runtime-es5.5f071ba442a6c083b2d7.js": "b62956c2192bfe5516d6374e753773901ed50ec5",
+    "/styles.ada1624565e0fc382cf5.css": "92cc06b3ee55c5f576caaf175cc583fd4bfefdb5"
+  },
+  "navigationUrls": [
+    {
+      "positive": true,
+      "regex": "^\\/.*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*\\.[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*\\/.*$"
+    }
+  ]
+}
