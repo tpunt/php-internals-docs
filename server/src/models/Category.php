@@ -2,7 +2,7 @@
 
 namespace PHPInternalsDocs\Models;
 
-class Category implements Formatter
+class Category implements Formatter, \JsonSerializable
 {
     public $name = '';
     public $url = '';
@@ -31,20 +31,59 @@ class Category implements Formatter
         }
 
         if (is_string($this->subcategories)) {
-            $this->subcategories = explode("\n", $this->subcategories);
+            if (!$this->subcategories) {
+                $this->subcategories = [];
+            } else {
+                $this->subcategories = explode("\n", $this->subcategories);
+            }
         }
 
         if (is_string($this->supercategories)) {
-            $this->supercategories = explode("\n", $this->supercategories);
+            if (!$this->supercategories) {
+                $this->supercategories = [];
+            } else {
+                $this->supercategories = explode("\n", $this->supercategories);
+            }
         }
     }
 
+    public function jsonSerialize()
+    {
+        $subcategories = [];
+        $supercategories = [];
+
+        foreach ($this->subcategories as $url => $name) {
+            $subcategories[] = ['category' => ['name' => $name, 'url' => $url]];
+        }
+
+        foreach ($this->supercategories as $url => $name) {
+            $supercategories[] = ['category' => ['name' => $name, 'url' => $url]];
+        }
+
+        $category = [
+            'cateogory' => [
+                'name' => $this->name,
+                'url' => $this->url,
+                'subcategories' => $subcategories,
+                'supercategories' => $supercategories,
+            ]
+        ];
+
+        if ($this->body) {
+            $category['category']['introduction'] = $this->body;
+        }
+
+        return $category;
+    }
+
     /*
-    Used to create compact forms of articles (erasing unnecessary fields)
+    Used to create compact forms of categories (erasing unnecessary fields)
     */
     public function __clone()
     {
         $this->body = '';
+        $this->articles = [];
+        $this->symbols = [];
     }
 
     // A relic from importing the DB - may be reused in future if client app

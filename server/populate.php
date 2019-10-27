@@ -40,6 +40,24 @@ foreach ($categories_files as $file) {
     $data['categories_compact'][$category->url] = clone $category;
 }
 
+foreach ($data['categories'] as $category_url => $category) {
+    $subcategories = [];
+    $supercategories = [];
+
+    foreach ($data['categories'][$category_url]->subcategories as $subcategory) {
+        $subcategories[$subcategory] = $data['categories'][$subcategory]->name;
+    }
+
+    foreach ($data['categories'][$category_url]->supercategories as $supercategory) {
+        $supercategories[$supercategory] = $data['categories'][$supercategory]->name;
+    }
+
+    $data['categories'][$category_url]->subcategories = $subcategories;
+    $data['categories'][$category_url]->supercategories = $supercategories;
+    $data['categories_compact'][$category_url]->subcategories = $subcategories;
+    $data['categories_compact'][$category_url]->supercategories = $supercategories;
+}
+
 // delayed due to category adding
 foreach ($data['articles'] as $article) {
     $data['articles_compact'][$article->url] = clone $article;
