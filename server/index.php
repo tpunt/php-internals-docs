@@ -14,7 +14,12 @@ use Amp\Log\StreamHandler;
 use Amp\Socket;
 use Monolog\Logger;
 
-use PHPInternalsDocs\Services\{MetaDataService, ArticlesService, CategoriesService};
+use PHPInternalsDocs\Services\{
+    MetaDataService,
+    ArticlesService,
+    CategoriesService,
+    SymbolsService
+};
 
 $data = require 'populate.php';
 
@@ -91,6 +96,24 @@ Amp\Loop::run(function () use ($data) {
     $router->addRoute('GET', '/categories/{category_url}', new CallableRequestHandler(function (Request $request) use ($data) {
         $args = $request->getAttribute(Router::class);
         $response = CategoriesService::fetchCategory($data, $args['category_url']);
+
+        return new Response(
+            $response['code'],
+            ['content-type' => 'application/json'],
+            json_encode($response['body'], JSON_PRETTY_PRINT)
+        );
+    }));
+
+    $router->addRoute('GET', '/symbols', new CallableRequestHandler(function (Request $request) use ($data) {
+        parse_str($request->getUri()->getQuery(), $query);
+
+        $response = SymbolsService::fetchSymbols($data, $query);
+
+        if ($response['code'] < 300) {
+            $response['body'] = MetaDataService::performMetaActions($response['body'], $query);
+            $response['body']['symbols'] = $response['body']['default'];
+            unset($response['body']['default']);
+        }
 
         return new Response(
             $response['code'],

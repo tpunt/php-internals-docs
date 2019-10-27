@@ -2,7 +2,7 @@
 
 namespace PHPInternalsDocs\Models;
 
-class Symbol implements Formatter
+class Symbol implements Formatter, \JsonSerializable
 {
     public $id = 0;
     public $name = '';
@@ -29,6 +29,36 @@ class Symbol implements Formatter
                 $this->parameters[] = $parameter[1];
             }
         }
+    }
+
+    public function jsonSerialize()
+    {
+        $categories = [];
+
+        foreach ($this->categories as $url => $name) {
+            $categories[] = ['category' => ['name' => $name, 'url' => $url]];
+        }
+
+        $symbol = [
+            'symbol' => [
+                'id' => $this->id,
+                'name' => $this->name,
+                'url' => $this->url,
+                'type' => $this->type,
+                'declaration' => $this->declaration,
+                'parameters' => $this->parameters,
+                'definition' => $this->definition,
+                'source_location' => $this->source_location,
+                'additional_information' => $this->additional_information,
+                'categories' => $categories,
+            ]
+        ];
+
+        if ($this->description) {
+            $symbol['symbol']['description'] = $this->description;
+        }
+
+        return $symbol;
     }
 
     /*
