@@ -21,11 +21,17 @@ use PHPInternalsDocs\Services\{
     SymbolsService
 };
 
+if (!getenv('IP') || !getenv('PORT')) {
+    echo 'The "IP" and "PORT" environment variables must be set first!', PHP_EOL;
+    die;
+}
+
 $data = require 'populate.php';
+
 
 Amp\Loop::run(function () use ($data) {
     $servers = [
-        Socket\listen("0.0.0.0:4000"),
+        Socket\listen(getenv('IP') . ':' . getenv('PORT')),
     ];
 
     $logHandler = new StreamHandler(new ResourceOutputStream(\STDOUT));
