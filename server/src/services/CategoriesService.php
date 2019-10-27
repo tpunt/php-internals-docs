@@ -5,6 +5,9 @@ namespace PHPInternalsDocs\Services;
 /*
 Fetch all categories:
  - https://phpinternals.net/api/categories?limit=20&offset=0
+
+Fetch one category:
+ - https://phpinternals.net/api/categories/compiler
 */
 
 class CategoriesService
@@ -28,5 +31,14 @@ class CategoriesService
         }
 
         return ['code' => 200, 'body' => $categories];
+    }
+
+    public static function fetchCategory($data, $category_url)
+    {
+        if (isset($data['categories'][$category_url])) {
+            return ['code' => 200, 'body' => $data['categories'][$category_url]];
+        }
+
+        return ['code' => 404, 'body' => 'Category not found'];
     }
 }

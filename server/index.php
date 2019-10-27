@@ -88,6 +88,17 @@ Amp\Loop::run(function () use ($data) {
         );
     }));
 
+    $router->addRoute('GET', '/categories/{category_url}', new CallableRequestHandler(function (Request $request) use ($data) {
+        $args = $request->getAttribute(Router::class);
+        $response = CategoriesService::fetchCategory($data, $args['category_url']);
+
+        return new Response(
+            $response['code'],
+            ['content-type' => 'application/json'],
+            json_encode($response['body'], JSON_PRETTY_PRINT)
+        );
+    }));
+
     $server = new Server($servers, $router, $logger);
 
     yield $server->start();
