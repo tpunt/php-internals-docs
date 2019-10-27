@@ -45,7 +45,7 @@ class ArticlesService
         return ['code' => 200, 'body' => $articles];
     }
 
-    public static function fetchArticle($data, $article_url, $query)
+    public static function fetchArticle($data, $article_url)
     {
         $series = self::filterArticlesBySeries($data, $article_url);
 

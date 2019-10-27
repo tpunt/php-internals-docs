@@ -53,7 +53,7 @@ Amp\Loop::run(function () use ($data) {
         parse_str($request->getUri()->getQuery(), $query);
 
         $args = $request->getAttribute(Router::class);
-        $response = ArticlesService::fetchArticle($data, $args['article_url'], $query);
+        $response = ArticlesService::fetchArticle($data, $args['article_url']);
 
         if ($response['code'] < 300) {
             if (is_array($response['body'])) { // an article_url can be the name of a series
