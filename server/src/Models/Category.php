@@ -70,7 +70,7 @@ class Category implements Formatter, \JsonSerializable
         ];
 
         if ($this->body) {
-            $category['category']['introduction'] = $this->body;
+            $category['category']['body'] = $this->body;
         }
 
         return $category;
