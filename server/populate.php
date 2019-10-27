@@ -12,7 +12,8 @@ $data = [
     'categories' => [],
     'categories_compact' => [],
     'symbols' => [],
-    'symbols_compact' => []
+    'symbols_compact' => [],
+    'symbols_ids_by_url' => [],
 ];
 
 foreach ($articles_files as $file) {
@@ -23,6 +24,7 @@ foreach ($articles_files as $file) {
 foreach ($symbols_files as $file) {
     $symbol = Parser::parse($file, 'Symbol');
     $data['symbols'][$symbol->id] = $symbol;
+    $data['symbols_ids_by_url'][$symbol->url][] = $symbol->id;
 }
 
 foreach ($categories_files as $file) {

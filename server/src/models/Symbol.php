@@ -41,7 +41,7 @@ class Symbol implements Formatter, \JsonSerializable
 
         $symbol = [
             'symbol' => [
-                'id' => $this->id,
+                'id' => intval($this->id),
                 'name' => $this->name,
                 'url' => $this->url,
                 'type' => $this->type,

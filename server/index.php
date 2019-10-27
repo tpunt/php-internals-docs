@@ -122,6 +122,17 @@ Amp\Loop::run(function () use ($data) {
         );
     }));
 
+    $router->addRoute('GET', '/symbols/{symbol_id}', new CallableRequestHandler(function (Request $request) use ($data) {
+        $args = $request->getAttribute(Router::class);
+        $response = SymbolsService::fetchSymbol($data, $args['symbol_id']);
+
+        return new Response(
+            $response['code'],
+            ['content-type' => 'application/json'],
+            json_encode($response['body'], JSON_PRETTY_PRINT)
+        );
+    }));
+
     $server = new Server($servers, $router, $logger);
 
     yield $server->start();
