@@ -21,10 +21,10 @@ class Article implements Formatter, \JsonSerializable
         $categories = [];
 
         foreach ($this->categories as $url => $name) {
-            $categories[] = ['name' => $name, 'url' => $url];
+            $categories[] = ['category' => ['name' => $name, 'url' => $url]];
         }
 
-        return [
+        $article = [
             'article' => [
                 'title' => $this->title,
                 'url' => $this->url,
@@ -33,10 +33,15 @@ class Article implements Formatter, \JsonSerializable
                 'series_name' => $this->series_name,
                 'series_url' => $this->series_url,
                 'excerpt' => $this->excerpt,
-                'body' => $this->body,
                 'categories' => $categories,
             ]
         ];
+
+        if ($this->body) { // compact versions of articles elide the body
+            $article['article']['body'] = $this->body;
+        }
+
+        return $article;
     }
 
     /*
