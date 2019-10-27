@@ -8,6 +8,7 @@ use Amp\Http\Server\RequestHandler\CallableRequestHandler;
 use Amp\Http\Server\Response;
 use Amp\Http\Server\Router;
 use Amp\Http\Server\Server;
+use Amp\Http\Server\Options;
 use Amp\Http\Status;
 use Amp\Log\ConsoleFormatter;
 use Amp\Log\StreamHandler;
@@ -30,6 +31,7 @@ $data = require 'populate.php';
 $response_headers = [
     'content-type' => 'application/json',
     'Access-Control-Allow-Origin' => '*',
+    'Access-Control-Allow-Methods' => 'GET, OPTIONS, HEAD',
 ];
 
 Amp\Loop::run(function () use ($data, $response_headers) {
@@ -44,6 +46,10 @@ Amp\Loop::run(function () use ($data, $response_headers) {
     $logger->pushHandler($logHandler);
 
     $router = new Router();
+
+    $router->addRoute('OPTIONS', '/{path:.*}', new CallableRequestHandler(function (Request $request) use ($response_headers) {
+        return new Response(204, $response_headers, '');
+    }));
 
     $router->addRoute('GET', '/api/articles', new CallableRequestHandler(function (Request $request) use ($data, $response_headers) {
         parse_str($request->getUri()->getQuery(), $query);
@@ -142,7 +148,7 @@ Amp\Loop::run(function () use ($data, $response_headers) {
         );
     }));
 
-    $server = new Server($servers, $router, $logger);
+    $server = new Server($servers, $router, $logger, (new Options)->withAllowedMethods(['GET', 'OPTIONS', 'HEAD']));
 
     yield $server->start();
 
