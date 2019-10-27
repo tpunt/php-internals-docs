@@ -27,8 +27,12 @@ if (!getenv('IP') || !getenv('PORT')) {
 }
 
 $data = require 'populate.php';
+$response_headers = [
+    'content-type' => 'application/json',
+    'Access-Control-Allow-Origin' => '*',
+];
 
-Amp\Loop::run(function () use ($data) {
+Amp\Loop::run(function () use ($data, $response_headers) {
     $servers = [
         Socket\listen(getenv('IP') . ':' . getenv('PORT')),
     ];
@@ -41,7 +45,7 @@ Amp\Loop::run(function () use ($data) {
 
     $router = new Router();
 
-    $router->addRoute('GET', '/articles', new CallableRequestHandler(function (Request $request) use ($data) {
+    $router->addRoute('GET', '/articles', new CallableRequestHandler(function (Request $request) use ($data, $response_headers) {
         parse_str($request->getUri()->getQuery(), $query);
 
         $response = ArticlesService::fetchArticles($data, $query);
@@ -54,12 +58,12 @@ Amp\Loop::run(function () use ($data) {
 
         return new Response(
             $response['code'],
-            ['content-type' => 'application/json'],
+            $response_headers,
             json_encode($response['body'], JSON_PRETTY_PRINT)
         );
     }));
 
-    $router->addRoute('GET', '/articles/{article_url}', new CallableRequestHandler(function (Request $request) use ($data) {
+    $router->addRoute('GET', '/articles/{article_url}', new CallableRequestHandler(function (Request $request) use ($data, $response_headers) {
         parse_str($request->getUri()->getQuery(), $query);
 
         $args = $request->getAttribute(Router::class);
@@ -75,12 +79,12 @@ Amp\Loop::run(function () use ($data) {
 
         return new Response(
             $response['code'],
-            ['content-type' => 'application/json'],
+            $response_headers,
             json_encode($response['body'], JSON_PRETTY_PRINT)
         );
     }));
 
-    $router->addRoute('GET', '/categories', new CallableRequestHandler(function (Request $request) use ($data) {
+    $router->addRoute('GET', '/categories', new CallableRequestHandler(function (Request $request) use ($data, $response_headers) {
         parse_str($request->getUri()->getQuery(), $query);
 
         $response = CategoriesService::fetchCategories($data, $query);
@@ -93,23 +97,23 @@ Amp\Loop::run(function () use ($data) {
 
         return new Response(
             $response['code'],
-            ['content-type' => 'application/json'],
+            $response_headers,
             json_encode($response['body'], JSON_PRETTY_PRINT)
         );
     }));
 
-    $router->addRoute('GET', '/categories/{category_url}', new CallableRequestHandler(function (Request $request) use ($data) {
+    $router->addRoute('GET', '/categories/{category_url}', new CallableRequestHandler(function (Request $request) use ($data, $response_headers) {
         $args = $request->getAttribute(Router::class);
         $response = CategoriesService::fetchCategory($data, $args['category_url']);
 
         return new Response(
             $response['code'],
-            ['content-type' => 'application/json'],
+            $response_headers,
             json_encode($response['body'], JSON_PRETTY_PRINT)
         );
     }));
 
-    $router->addRoute('GET', '/symbols', new CallableRequestHandler(function (Request $request) use ($data) {
+    $router->addRoute('GET', '/symbols', new CallableRequestHandler(function (Request $request) use ($data, $response_headers) {
         parse_str($request->getUri()->getQuery(), $query);
 
         $response = SymbolsService::fetchSymbols($data, $query);
@@ -122,18 +126,18 @@ Amp\Loop::run(function () use ($data) {
 
         return new Response(
             $response['code'],
-            ['content-type' => 'application/json'],
+            $response_headers,
             json_encode($response['body'], JSON_PRETTY_PRINT)
         );
     }));
 
-    $router->addRoute('GET', '/symbols/{symbol_id}', new CallableRequestHandler(function (Request $request) use ($data) {
+    $router->addRoute('GET', '/symbols/{symbol_id}', new CallableRequestHandler(function (Request $request) use ($data, $response_headers) {
         $args = $request->getAttribute(Router::class);
         $response = SymbolsService::fetchSymbol($data, $args['symbol_id']);
 
         return new Response(
             $response['code'],
-            ['content-type' => 'application/json'],
+            $response_headers,
             json_encode($response['body'], JSON_PRETTY_PRINT)
         );
     }));
