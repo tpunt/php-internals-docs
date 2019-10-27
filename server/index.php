@@ -28,7 +28,6 @@ if (!getenv('IP') || !getenv('PORT')) {
 
 $data = require 'populate.php';
 
-
 Amp\Loop::run(function () use ($data) {
     $servers = [
         Socket\listen(getenv('IP') . ':' . getenv('PORT')),
