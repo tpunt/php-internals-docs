@@ -2,6 +2,8 @@
 
 namespace PHPInternalsDocs\Services;
 
+use PHPInternalsDocs\Models\Error;
+
 /*
 Fetch all symbols:
  - https://phpinternals.net/api/symbols
@@ -60,7 +62,7 @@ class SymbolsService
             return ['code' => 200, 'body' => $data['symbols'][$symbol_id]];
         }
 
-        return ['code' => 404, 'body' => 'Symbol not found'];
+        return ['code' => 404, 'body' => new Error('Symbol not found')];
     }
 
     private static function filterSymbolByUrl($data, $symbol_url)

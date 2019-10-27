@@ -2,6 +2,8 @@
 
 namespace PHPInternalsDocs\Services;
 
+use PHPInternalsDocs\Models\Error;
+
 /*
 Fetch all articles:
  - https://phpinternals.net/api/articles?limit=10&ordering=desc&offset=0
@@ -57,7 +59,7 @@ class ArticlesService
             return ['code' => 200, 'body' => $data['articles'][$article_url]];
         }
 
-        return ['code' => 404, 'body' => 'Article not found'];
+        return ['code' => 404, 'body' => new Error('Article not found')];
     }
 
     private static function filterArticlesByCategory($data, $category_url)

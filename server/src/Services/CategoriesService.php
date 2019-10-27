@@ -2,6 +2,8 @@
 
 namespace PHPInternalsDocs\Services;
 
+use PHPInternalsDocs\Models\Error;
+
 /*
 Fetch all categories:
  - https://phpinternals.net/api/categories?limit=20&offset=0
@@ -39,6 +41,6 @@ class CategoriesService
             return ['code' => 200, 'body' => $data['categories'][$category_url]];
         }
 
-        return ['code' => 404, 'body' => 'Category not found'];
+        return ['code' => 404, 'body' => new Error('Category not found')];
     }
 }
