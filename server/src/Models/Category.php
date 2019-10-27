@@ -61,7 +61,7 @@ class Category implements Formatter, \JsonSerializable
         }
 
         $category = [
-            'cateogory' => [
+            'category' => [
                 'name' => $this->name,
                 'url' => $this->url,
                 'subcategories' => $subcategories,
