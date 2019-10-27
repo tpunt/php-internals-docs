@@ -45,7 +45,7 @@ Amp\Loop::run(function () use ($data, $response_headers) {
 
     $router = new Router();
 
-    $router->addRoute('GET', '/articles', new CallableRequestHandler(function (Request $request) use ($data, $response_headers) {
+    $router->addRoute('GET', '/api/articles', new CallableRequestHandler(function (Request $request) use ($data, $response_headers) {
         parse_str($request->getUri()->getQuery(), $query);
 
         $response = ArticlesService::fetchArticles($data, $query);
@@ -63,7 +63,7 @@ Amp\Loop::run(function () use ($data, $response_headers) {
         );
     }));
 
-    $router->addRoute('GET', '/articles/{article_url}', new CallableRequestHandler(function (Request $request) use ($data, $response_headers) {
+    $router->addRoute('GET', '/api/articles/{article_url}', new CallableRequestHandler(function (Request $request) use ($data, $response_headers) {
         parse_str($request->getUri()->getQuery(), $query);
 
         $args = $request->getAttribute(Router::class);
@@ -84,7 +84,7 @@ Amp\Loop::run(function () use ($data, $response_headers) {
         );
     }));
 
-    $router->addRoute('GET', '/categories', new CallableRequestHandler(function (Request $request) use ($data, $response_headers) {
+    $router->addRoute('GET', '/api/categories', new CallableRequestHandler(function (Request $request) use ($data, $response_headers) {
         parse_str($request->getUri()->getQuery(), $query);
 
         $response = CategoriesService::fetchCategories($data, $query);
@@ -102,7 +102,7 @@ Amp\Loop::run(function () use ($data, $response_headers) {
         );
     }));
 
-    $router->addRoute('GET', '/categories/{category_url}', new CallableRequestHandler(function (Request $request) use ($data, $response_headers) {
+    $router->addRoute('GET', '/api/categories/{category_url}', new CallableRequestHandler(function (Request $request) use ($data, $response_headers) {
         $args = $request->getAttribute(Router::class);
         $response = CategoriesService::fetchCategory($data, $args['category_url']);
 
@@ -113,7 +113,7 @@ Amp\Loop::run(function () use ($data, $response_headers) {
         );
     }));
 
-    $router->addRoute('GET', '/symbols', new CallableRequestHandler(function (Request $request) use ($data, $response_headers) {
+    $router->addRoute('GET', '/api/symbols', new CallableRequestHandler(function (Request $request) use ($data, $response_headers) {
         parse_str($request->getUri()->getQuery(), $query);
 
         $response = SymbolsService::fetchSymbols($data, $query);
@@ -131,7 +131,7 @@ Amp\Loop::run(function () use ($data, $response_headers) {
         );
     }));
 
-    $router->addRoute('GET', '/symbols/{symbol_id}', new CallableRequestHandler(function (Request $request) use ($data, $response_headers) {
+    $router->addRoute('GET', '/api/symbols/{symbol_id}', new CallableRequestHandler(function (Request $request) use ($data, $response_headers) {
         $args = $request->getAttribute(Router::class);
         $response = SymbolsService::fetchSymbol($data, $args['symbol_id']);
 
