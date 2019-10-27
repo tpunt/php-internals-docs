@@ -28,20 +28,18 @@ class ArticlesService
             $articles = array_values($data['articles_compact']);
         }
 
-        if (isset($query['ordering'])) {
-            $ordering = $query['ordering'];
+        $ordering = $query['ordering'] ?? 'desc';
 
-            switch ($ordering) {
-                case 'asc':
-                case 'desc':
-                    usort($articles, function ($a, $b) use ($ordering) {
-                        if ($ordering === 'desc') {
-                            return $a->date < $b->date;
-                        }
+        switch ($ordering) {
+            case 'asc':
+            case 'desc':
+                usort($articles, function ($a, $b) use ($ordering) {
+                    if ($ordering === 'desc') {
+                        return $a->date < $b->date;
+                    }
 
-                        return $a->date > $b->date;
-                    });
-            }
+                    return $a->date > $b->date;
+                });
         }
 
         return ['code' => 200, 'body' => $articles];
