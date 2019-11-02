@@ -1,7 +1,7 @@
 {
     "require": {
         "graphaware/neo4j-php-client": "^4.0",
-        "amphp/http-server": "^1.1",
+        "amphp/http-server": "^2.0",
         "amphp/http-server-router": "^1.0",
         "amphp/log": "^1.1"
     },
@@ -9,5 +9,6 @@
         "psr-4": {
             "PHPInternalsDocs\\": "src/"
         }
-    }
+    },
+    "minimum-stability": "RC"
 }

@@ -27,6 +27,15 @@ if (!getenv('IP') || !getenv('PORT')) {
     die;
 }
 
+$env = getenv('ENV') ? getenv('ENV') : 'dev';
+
+if ($env == 'prod') {
+    if (!getenv('CERT')) {
+        echo 'The "CERT" environment variable must be set firts!', PHP_EOL;
+        die;
+    }
+}
+
 $data = require 'populate.php';
 $response_headers = [
     'content-type' => 'application/json',
@@ -34,10 +43,19 @@ $response_headers = [
     'Access-Control-Allow-Methods' => 'GET, OPTIONS, HEAD',
 ];
 
-Amp\Loop::run(function () use ($data, $response_headers) {
-    $servers = [
-        Socket\listen(getenv('IP') . ':' . getenv('PORT')),
-    ];
+Amp\Loop::run(function () use ($data, $response_headers, $env) {
+    $servers = [];
+    $address = getenv('IP') . ':' . getenv('PORT');
+
+    if ($env === 'prod') {
+        $cert = new Socket\Certificate(getenv('CERT'));
+        $context = (new Socket\BindContext)
+            ->withTlsContext((new Socket\ServerTlsContext)
+            ->withDefaultCertificate($cert));
+        $servers[] = Socket\listen($address, $context);
+    } else {
+        $servers[] = Socket\listen($address);
+    }
 
     $logHandler = new StreamHandler(new ResourceOutputStream(\STDOUT));
     $logHandler->setFormatter(new ConsoleFormatter);
