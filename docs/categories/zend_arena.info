@@ -20,7 +20,7 @@ zend_arena
 18125640
 
 [[[body]]]
-An arena (or [region-based memory management](https://en.wikipedia.org/wiki/Region-based_memory_management)) is a memory management technique that allows for a more efficient use use of memory. Arenas are large blocks of memory that are allocated in one go, and ultimately deallocated in one go. With the allocated block of memory, sub-blocks can be delegated by the application for different things without incurring allocation overhead. Once finished with, these sub-blocks can all be deallocated in one go without incurring separate deallocation overhead either. Arena-based memory is therefore only used when there will be many small heap-based allocations for a well-defined scope.
+An arena (or [region-based memory management](https://en.wikipedia.org/wiki/Region-based_memory_management)) is a memory management technique that allows for a more efficient use of memory. Arenas are large blocks of memory that are allocated in one go, and ultimately deallocated in one go. With the allocated block of memory, sub-blocks can be delegated by the application for different things without incurring allocation overhead. Once finished with, these sub-blocks can all be deallocated in one go without incurring separate deallocation overhead either. Arena-based memory is therefore only used when there will be many small heap-based allocations for a well-defined scope.
 
 Multiple Zend Arenas for a particular use-case may be needed, where each arena is kept track of by using a singly-linked list structure. This means that a newly allocated arena block is linked to the previous arena block that has just run out of space.
 
